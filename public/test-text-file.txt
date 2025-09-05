@@ -1,0 +1,14 @@
+Este é um arquivo de texto de exemplo.
+
+Este arquivo serve como fallback para demonstrar a funcionalidade de visualização de arquivos de texto (.txt) no sistema.
+
+Conteúdo de exemplo:
+- Item 1: Demonstração de texto simples
+- Item 2: Suporte a quebras de linha
+- Item 3: Formatação básica
+
+O sistema agora detecta automaticamente arquivos .txt e os exibe usando o componente VisualizarDocumento em vez do ImageViewer.
+
+Data de criação: 2024
+Tipo: Arquivo de teste
+Formato: Texto simples (.txt)

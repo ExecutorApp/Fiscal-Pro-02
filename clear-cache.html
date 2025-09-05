@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Limpar Cache - Fiscal Pro</title>
+</head>
+<body>
+    <h1>Limpeza de Cache - Fiscal Pro</h1>
+    <button onclick="clearAllCache()">Limpar Todo o Cache</button>
+    <div id="status"></div>
+    
+    <script>
+        function clearAllCache() {
+            const status = document.getElementById('status');
+            
+            try {
+                // Limpar localStorage
+                localStorage.clear();
+                
+                // Limpar sessionStorage
+                sessionStorage.clear();
+                
+                // Limpar cookies do domínio
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                
+                status.innerHTML = '<p style="color: green;">Cache limpo com sucesso! Recarregue a página principal.</p>';
+                
+                // Recarregar após 2 segundos
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:5174/';
+                }, 2000);
+                
+            } catch (error) {
+                status.innerHTML = '<p style="color: red;">Erro ao limpar cache: ' + error.message + '</p>';
+            }
+        }
+        
+        // Executar automaticamente ao carregar
+        window.onload = function() {
+            clearAllCache();
+        };
+    </script>
+</body>
+</html>

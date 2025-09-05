@@ -1,0 +1,185 @@
+Catálogo de Tipos de Campos
+
+### Texto curto
+-  Usado para: Nome, Razão Social, Email, Cargo etc.
+-  Configurações: Label, Placeholder, Obrigatório.
+
+### Texto longo (multi-linha)
+- Usado para: Descrição da empresa, Observações.
+- Configurações: Label, Placeholder, Limite de caracteres, Obrigatório.
+
+### Data
+- Usado para: Data de Fundação, Cadastro, Aniversáio.
+- Configurações: Label, Placeholder, Formato (DD/MM/AAAA), Obrigatório.
+
+
+### Campos Numéricos (específicos)
+Cada opção já vem com sua validação própria:
+
+1. CPF ou CNPJ:
+- Regras de Negócio:
+  - Deve identificar automaticamente se o valor digitado é CPF (11 dígitos) ou CNPJ (14 dígitos).
+  - Máscaras dinâmicas:
+    - CPF: 000.000.000-00
+    - CNPJ: 00.000.000/0000-00
+  - Validação:
+    - CPF → 11 dígitos com cálculo de dígito verificador.
+    - CNPJ → 14 dígitos com cálculo de dígito verificador.
+  - Não permitir números inválidos (ex: sequências repetitivas como 11111111111).
+  - Definir se é obrigatório. 
+
+- Visual:
+  - Label: CPF ou CNPJ
+  - Placeholder: Digite o CPF ou CNPJ
+  - Definir se é obrigatório. 
+
+2. CPF:
+- Regras de Negócio:
+  - Máscara: 000.000.000-00
+  - Validação: 11 dígitos obrigatórios, cálculo de dígito verificador.
+  - Não permitir sequências inválidas (ex: 111.111.111-11).
+
+- Visual:
+  - Label: CPF
+  - Placeholder: Digite o CPF
+  - Definir se é obrigatório. 
+
+3. CNPJ:
+- Regras de Negócio:
+  - Máscara: 00.000.000/0000-00
+  - Validação: 14 dígitos obrigatórios, cálculo de dígito verificador.
+  - Não permitir números inválidos ou repetitivos.
+
+- Visual:
+  - Label: CNPJ
+  - Placeholder: Digite o CNPJ da empresa
+  - Definir se é obrigatório. 
+
+4. Telefone:
+- Regras de Negócio:
+  - Máscara: (00) 0000-0000 ou (00) 00000-0000
+  - Validação: mínimo 10 e máximo 11 dígitos.
+  - Pode aceitar código internacional (+55).
+
+- Visual:
+  - Label: Telefone
+  - Placeholder: (11) 91234-5678
+  - Definir se é obrigatório. 
+
+5. CEP:
+- Regras de Negócio:
+  - Máscara: 00000-000
+  - Validação: 8 dígitos.
+
+- Visual:
+  - Label: CEP
+  - Placeholder: Digite o CEP
+  - Definir se é obrigatório. 
+
+6. Números inteiros:
+- Regras de Negócio:
+  - Apenas números inteiros positivos.
+  - Limite mínimo e máximo.
+
+- Visual:
+  - Label: Qtd. de Funcionários
+  - Placeholder: Ex: 250
+  - Definir se é obrigatório. 
+  - Limite mínimo e máximo. 
+
+7. Números inteiros + Letras:
+- Regras de Negócio:
+  - Apenas números inteiros positivos e Letras.
+  - Limite mínimo e máximo.
+
+- Visual:
+  - Label: Qtd. de Funcionários
+  - Placeholder: Ex: 250
+  - Definir se é obrigatório. 
+  - Limite mínimo e máximo. 
+
+8. Inscrição Estadual:
+- Regras de Negócio:
+  - Formato varia conforme estado (9 a 12 dígitos).
+  - Deve permitir a opção "Isento".
+
+- Visual:
+  - Label: Inscrição Estadual
+  - Placeholder: Digite a IE ou selecione Isento
+  - Definir se é obrigatório. 
+
+9. Inscrição Municipal:
+- Regras de Negócio:
+  - Formato definido por município (normalmente numérico).
+  - Validação: apenas números.
+
+- Visual:
+  - Label: Inscrição Municipal
+  - Placeholder: Digite a IM
+  - Definir se é obrigatório. 
+
+### Seleção Dropdown (Menu Suspenso)
+- Regras de Negócio:
+  - Seleção única.
+  - CRUD de opções: adicionar, editar (rótulo/valor), excluir e reordenar.
+  - Impedir opções duplicadas e aparar espaços.
+  - Obrigatoriedade configurável (obrigatório/opcional).
+  - Opção padrão (default) configurável.
+  - Suporte a muitas opções
+  - Opção "Outro" habilitável; ao escolher, exibir input de texto complementar.
+  - Dependências condicionais: exibir/ocultar outros campos com base na opção selecionada.
+  - Acessibilidade: navegação por teclado, aria-label, foco visível.
+  - Internacionalização: valor interno estável; rótulo traduzível.
+  - Importação em massa de opções (colagem linha a linha ou CSV simples rótulo;valor).
+  - Erros e estados: mostrar mensagem clara (ex: "Selecione uma opção"), estados normal/foco/erro/desabilitado.
+
+- Visual:
+  - Label: Tipo de empresa
+  - Placeholder: Selecione o tipo
+  - Opções (exemplo): MEI; LTDA; SA; EIRELI; Outro
+
+
+### Seleção Radio (Única escolha)
+- Regras de Negócio:
+  - Seleção única com todas as opções visíveis.
+  - Ideal para poucas opções (ex: 2 a 6).
+  - CRUD de opções: adicionar, renomear (rótulo/valor), excluir e reordenar.
+  - Impedir rótulos duplicados e aparar espaços.
+  - Obrigatoriedade configurável.
+  - Opção padrão (default) configurável.
+  - Opção "Outro" habilitável; ao marcar, exibir input texto abaixo do grupo.
+  - Dependências condicionais: exibir/ocultar campos conforme a escolha.
+  - Acessibilidade: cada item com input radio real, labels clicáveis, suporte a setas do teclado.
+  - Internacionalização: valores internos estáveis; rótulos traduzíveis.
+  - Erros/estados: mensagem clara (ex: "Escolha uma opção"); normal/foco/erro/desabilitado.
+
+- Visual:
+  - Label: Status da empresa
+  - Placeholder: (não aplicável)
+  - Opções (exemplo): Ativa; Inativa; Em análise; Outro
+
+
+### Seleção Checkbox (Múltipla escolha)
+- Regras de Negócio:
+  - Seleção múltipla.
+  - CRUD de opções: adicionar, renomear (rótulo/valor), excluir e reordenar.
+  - Impedir rótulos duplicados e aparar espaços.
+  - Obrigatoriedade configurável com regras de mínimo/máximo selecionados (ex: min=1, max=3).
+  - Estado padrão: permitir marcar opções iniciais.
+  - Opção "Outro" habilitável; ao marcar, exibir input texto adicional.
+  - Dependências condicionais: exibir/ocultar campos com base em qualquer seleção.
+  - Acessibilidade: inputs checkbox reais, labels clicáveis, foco visível.
+  - Internacionalização: valores internos estáveis; rótulos traduzíveis.
+  - Erros/estados: mensagem clara (ex: "Selecione até 3 opções"); normal/foco/erro/desabilitado.
+
+- Visual:
+  - Label: Segmentos atendidos
+  - Placeholder: (não aplicável)
+  - Opções (exemplo): Indústria; Varejo; Serviços; Agro; Outro
+
+## Fluxo para o gestor
+
+1. Escolhe a categoria (Texto, Número, Data, Seleção…).
+2. Se escolher Número, abre uma lista detalhada de campos específicos (CPF, CNPJ, Telefone, etc.).
+3. Personaliza Label + Placeholder.
+4. Define obrigatoriedade, máscara ou opções extras.

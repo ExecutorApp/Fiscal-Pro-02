@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Reset básico para remover scroll externo */
+  html, body {
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  #root {
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  * {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  /* Classe para ocultar barra de rolagem em todos os navegadores */
+  .hide-scrollbar {
+    /* Firefox */
+    scrollbar-width: none;
+    /* IE e Edge */
+    -ms-overflow-style: none;
+  }
+  
+  /* WebKit (Chrome, Safari, Edge baseado em Chromium) */
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Estilos customizados para dropdown de regime de bens */
+  .regime-bens-dropdown {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    padding-right: 50px;
+  }
+
+  /* Estilos específicos para o dropdown Regime de Bens */
+  select.regime-bens-dropdown {
+    /* Truncamento de texto no select */
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    /* Garantir largura consistente */
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  select.regime-bens-dropdown option {
+    padding: 8px 12px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    background-color: white !important;
+    /* Truncamento de texto nas opções */
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    /* Garantir que a largura seja igual ao campo dropdown */
+    width: 100% !important;
+    box-sizing: border-box !important;
+    /* Altura mínima para melhor visualização */
+    min-height: 32px !important;
+    line-height: 1.4 !important;
+  }
+
+  select.regime-bens-dropdown option:last-child {
+    border-bottom: none !important;
+  }
+
+  select.regime-bens-dropdown option:hover {
+    background-color: #f3f4f6 !important;
+  }
+
+  /* Garantir que a lista suspensa tenha a mesma largura do campo */
+  select.regime-bens-dropdown:focus {
+    /* Força a lista suspensa a ter a mesma largura */
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Estilos para o Dropdown Customizado */
+  .dropdown-customizado {
+    position: relative;
+    width: 100%;
+  }
+
+  .dropdown-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 36px;
+    width: 100%;
+    padding: 8px 12px;
+    border: 0.5px solid #d1d5db;
+    border-radius: 6px;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+  }
+
+  .dropdown-trigger:hover {
+    border-color: #9ca3af;
+  }
+
+  .dropdown-trigger.open,
+  .dropdown-trigger:focus {
+    border-color: #1777CF;
+    border-width: 1px;
+    outline: none;
+  }
+
+  .dropdown-trigger.disabled {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .dropdown-value {
+    flex: 1;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+  }
+
+  .dropdown-value.placeholder {
+    color: #9ca3af;
+  }
+
+  .dropdown-value:not(.placeholder) {
+    color: #374151;
+  }
+
+  .dropdown-arrow {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .dropdown-arrow.rotated {
+    transform: rotate(180deg);
+  }
+
+  .dropdown-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: white;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    margin-top: 2px;
+    /* Removida a altura máxima e overflow para mostrar todas as opções */
+  }
+
+  .dropdown-option {
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background-color 0.2s ease;
+  }
+
+  .dropdown-option:hover {
+    background-color: #f3f4f6;
+  }
+
+  .dropdown-option.selected {
+    background-color: #eff6ff;
+    color: #1777CF;
+  }
+
+  .dropdown-option.with-border {
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  /* Barra de rolagem customizada para a seção família */
+  .familia-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db #f9fafb;
+    padding-right: 5px;
+    margin-right: 0px;
+  }
+
+  .familia-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .familia-scrollbar::-webkit-scrollbar-track {
+    background: #f9fafb;
+    border-radius: 4px;
+  }
+
+  .familia-scrollbar::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+  }
+
+  .familia-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+}

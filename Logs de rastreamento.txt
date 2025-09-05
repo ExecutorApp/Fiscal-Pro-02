@@ -1,0 +1,163 @@
+[verificarDadosAntigos] Verificando chaves: ['segmentos_data']
+limparDadosAntigos.ts:75 🔍 [verificarDadosAntigos] Padrões procurados: (12) ['dadosFamiliares', 'dadosFamiliares_metadata', 'secaoFamiliaVersao', 'dadosFamiliares_', 'dadosFamiliares_metadata_', 'layoutFamilia', 'familiaLayout', 'familiaConfig', 'configFamilia', 'SecaoFamilia_cache', 'familia_cache', 'carrosselFamilia_cache']
+limparDadosAntigos.ts:95 🔍 [verificarDadosAntigos] Chaves antigas encontradas: []
+limparDadosAntigos.ts:96 🔍 [verificarDadosAntigos] Resultado: false
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: false, conjugeAtivo: undefined, exConjugesLength: undefined}
+SecaoFamiliaV2.tsx:373 🔥 [DEBUG] Filho não encontrado - não aplicando seleção automática
+SecaoFamiliaV2.tsx:136 🔄 [DEBUG TROCA ABA] Estado atual da aba filho: null
+SecaoFamiliaV2.tsx:137 🔄 [DEBUG TROCA ABA] Índices atuais: {filhoSelecionado: 0, conjugeFilhoSelecionado: 0, netoSelecionado: 0}
+SecaoFamiliaV2.tsx:141 🔄 [DEBUG SALVAMENTO] Salvando índices: {filhoSelecionado: 0, conjugeFilhoSelecionado: 0, netoSelecionado: 0, abaFilhoAtiva: null}
+SecaoFamiliaV2.tsx:263 🔄 [DEBUG TROCA ABA EX] Nenhum índice salvo - aplicando seleção automática no filho 0
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: false, conjugeAtivo: undefined, exConjugesLength: undefined}
+SecaoFamiliaV2.tsx:373 🔥 [DEBUG] Filho não encontrado - não aplicando seleção automática
+SecaoFamiliaV2.tsx:86 🔥 [DEBUG APLICAR SELEÇÃO] Função chamada para filho índice: 0
+SecaoFamiliaV2.tsx:87 🔥 [DEBUG] Stack trace: Error
+    at http://192.168.0.100:5174/src/components/SecaoFamiliaV2.tsx?t=1756819773412:69:44
+    at http://192.168.0.100:5174/src/components/SecaoFamiliaV2.tsx?t=1756819773412:197:26
+SecaoFamiliaV2.tsx:90 🔥 [DEBUG] Filho encontrado: undefined
+SecaoFamiliaV2.tsx:93 🔥 [DEBUG] Filho não encontrado - setAbaFilhoAtiva(null)
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: false, conjugeAtivo: undefined, exConjugesLength: undefined}
+SecaoFamiliaV2.tsx:373 🔥 [DEBUG] Filho não encontrado - não aplicando seleção automática
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:39.607Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:41.374Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:41.656Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:41.939Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+SecaoFamiliaV2.tsx:829 🔥 [DEBUG ADICIONAR FILHO] Iniciando adição de novo filho
+SecaoFamiliaV2.tsx:830 🔥 [DEBUG] Estado atual: {abaAtiva: 'ex', filhoSelecionado: 0, abaFilhoAtiva: 'conjuge', dadosFamiliaFilhos: 0}
+SecaoFamiliaV2.tsx:838 🔥 [DEBUG] Novo índice do filho: 0
+SecaoFamiliaV2.tsx:841 🔥 [DEBUG] Dispatch ADICIONAR_FILHO executado
+SecaoFamiliaV2.tsx:845 🔥 [DEBUG] setFilhoSelecionado chamado com: 0
+SecaoFamiliaV2.tsx:851 🔥 [DEBUG] setAbaFilhoAtiva(null) executado - deveria estar deselecionada
+useFamiliaEstados.ts:187 Estado do ex-cônjuge 0 carregado: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+SecaoFamiliaV2.tsx:865 🔥 [DEBUG ADICIONAR FILHO] Finalizando função handleAdicionarFilho
+SecaoFamiliaV2.tsx:866 🔥 [DEBUG] Estado final esperado: abaFilhoAtiva deveria ser null
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: false, conjugeAtivo: null, exConjugesLength: 0}
+SecaoFamiliaV2.tsx:388 🔥 [DEBUG] Nenhum dado para selecionar - mantendo aba deselecionada
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:42.807Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(0), filhos: Array(0), timestamp: '2025-09-02T13:56:42.807Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:42.807Z'}
+useFamiliaEstados.ts:187 Estado do ex-cônjuge 0 carregado: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: false, conjugeAtivo: null, exConjugesLength: 0}
+SecaoFamiliaV2.tsx:388 🔥 [DEBUG] Nenhum dado para selecionar - mantendo aba deselecionada
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:43.607Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(0), filhos: Array(0), timestamp: '2025-09-02T13:56:43.607Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:43.607Z'}
+useFamiliaEstados.ts:187 Estado do ex-cônjuge 0 carregado: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: false, conjugeAtivo: null, exConjugesLength: 0}
+SecaoFamiliaV2.tsx:388 🔥 [DEBUG] Nenhum dado para selecionar - mantendo aba deselecionada
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:43.856Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(0), filhos: Array(0), timestamp: '2025-09-02T13:56:43.856Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:43.856Z'}
+useFamiliaEstados.ts:187 Estado do ex-cônjuge 0 carregado: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: false, conjugeAtivo: null, exConjugesLength: 0}
+SecaoFamiliaV2.tsx:388 🔥 [DEBUG] Nenhum dado para selecionar - mantendo aba deselecionada
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:44.175Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(0), filhos: Array(0), timestamp: '2025-09-02T13:56:44.175Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:44.175Z'}
+SecaoFamiliaV2.tsx:402 🔄 [DEBUG TROCA ABA FILHO] Trocando aba da coluna 3 para: ex
+SecaoFamiliaV2.tsx:414 🔄 [DEBUG TROCA ABA FILHO] Salvando estado atual: {filhoSelecionado: 0, conjugeFilhoSelecionado: 0, netoSelecionado: 0, abaFilhoAtiva: null}
+useFamiliaEstados.ts:93 💾 [DEBUG LOCALSTORAGE] Índices do ex-cônjuge 0 salvos: familia_indices_ex_conjuge_0 {filhoSelecionado: 0, conjugeFilhoSelecionado: 0, netoSelecionado: 0, abaFilhoAtiva: null, timestamp: '2025-09-02T13:56:45.028Z'}
+useFamiliaEstados.ts:94 💾 [DEBUG LOCALSTORAGE] Estado completo salvo: {
+  "filhoSelecionado": 0,
+  "conjugeFilhoSelecionado": 0,
+  "netoSelecionado": 0,
+  "abaFilhoAtiva": null,
+  "timestamp": "2025-09-02T13:56:45.028Z"
+}
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: true, conjugeAtivo: null, exConjugesLength: 0}
+SecaoFamiliaV2.tsx:366 🔥 [DEBUG] Seleção manual detectada - não aplicando seleção automática
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: true, conjugeAtivo: null, exConjugesLength: 0}
+SecaoFamiliaV2.tsx:366 🔥 [DEBUG] Seleção manual detectada - não aplicando seleção automática
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:45.041Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(0), filhos: Array(0), timestamp: '2025-09-02T13:56:45.041Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:45.041Z'}
+useFamiliaEstados.ts:187 Estado do ex-cônjuge 0 carregado: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: true, conjugeAtivo: null, exConjugesLength: 1}
+SecaoFamiliaV2.tsx:366 🔥 [DEBUG] Seleção manual detectada - não aplicando seleção automática
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:45.542Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(1), filhos: Array(0), timestamp: '2025-09-02T13:56:45.542Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:45.542Z'}
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: true, conjugeAtivo: null, exConjugesLength: 1}
+SecaoFamiliaV2.tsx:366 🔥 [DEBUG] Seleção manual detectada - não aplicando seleção automática
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:46.608Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(1), filhos: Array(0), timestamp: '2025-09-02T13:56:46.608Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:46.608Z'}
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: true, conjugeAtivo: null, exConjugesLength: 1}
+SecaoFamiliaV2.tsx:366 🔥 [DEBUG] Seleção manual detectada - não aplicando seleção automática
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:46.857Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(1), filhos: Array(0), timestamp: '2025-09-02T13:56:46.857Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:46.857Z'}
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: true, conjugeAtivo: null, exConjugesLength: 1}
+SecaoFamiliaV2.tsx:366 🔥 [DEBUG] Seleção manual detectada - não aplicando seleção automática
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:47.157Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(1), filhos: Array(0), timestamp: '2025-09-02T13:56:47.157Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:47.157Z'}
+useFamiliaEstados.ts:396 Netos do ex-cônjuge 0 do filho 0 salvos: familia_netos_filho_0_conjuge_0
+useFamiliaEstados.ts:187 Estado do ex-cônjuge 0 carregado: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: true, conjugeAtivo: null, exConjugesLength: 1}
+SecaoFamiliaV2.tsx:366 🔥 [DEBUG] Seleção manual detectada - não aplicando seleção automática
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:48.374Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(1), filhos: Array(1), timestamp: '2025-09-02T13:56:48.375Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:48.375Z'}
+useFamiliaEstados.ts:396 Netos do ex-cônjuge 0 do filho 0 salvos: familia_netos_filho_0_conjuge_0
+useFamiliaEstados.ts:187 Estado do ex-cônjuge 0 carregado: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: true, conjugeAtivo: null, exConjugesLength: 1}
+SecaoFamiliaV2.tsx:366 🔥 [DEBUG] Seleção manual detectada - não aplicando seleção automática
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:49.324Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(1), filhos: Array(1), timestamp: '2025-09-02T13:56:49.324Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:49.324Z'}
+useFamiliaEstados.ts:396 Netos do ex-cônjuge 0 do filho 0 salvos: familia_netos_filho_0_conjuge_0
+useFamiliaEstados.ts:187 Estado do ex-cônjuge 0 carregado: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: true, conjugeAtivo: null, exConjugesLength: 1}
+SecaoFamiliaV2.tsx:366 🔥 [DEBUG] Seleção manual detectada - não aplicando seleção automática
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:49.662Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(1), filhos: Array(1), timestamp: '2025-09-02T13:56:49.662Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:49.662Z'}
+useFamiliaEstados.ts:396 Netos do ex-cônjuge 0 do filho 0 salvos: familia_netos_filho_0_conjuge_0
+useFamiliaEstados.ts:187 Estado do ex-cônjuge 0 carregado: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: true, conjugeAtivo: null, exConjugesLength: 1}
+SecaoFamiliaV2.tsx:366 🔥 [DEBUG] Seleção manual detectada - não aplicando seleção automática
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:49.974Z'}
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(1), filhos: Array(1), timestamp: '2025-09-02T13:56:49.974Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:49.974Z'}
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(1), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:51.130Z'}
+useFamiliaEstados.ts:187 Estado do ex-cônjuge 0 carregado: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:218 Estado do filho 0 salvo: familia_filho_0 {conjuges: Array(1), filhos: Array(1), timestamp: '2025-09-02T13:56:51.130Z'} {conjugeFilhoSelecionado: 0, netoSelecionado: 0, timestamp: '2025-09-02T13:56:51.130Z'}
+SecaoFamiliaV2.tsx:356 🔥 [DEBUG USEEFFECT] useEffect de seleção automática executado
+SecaoFamiliaV2.tsx:357 🔥 [DEBUG] Dependências: {filhoSelecionado: 0, selecaoManualAbaFilho: true, conjugeAtivo: undefined, exConjugesLength: undefined}
+SecaoFamiliaV2.tsx:366 🔥 [DEBUG] Seleção manual detectada - não aplicando seleção automática
+useFamiliaEstados.ts:315 Estado geral da família salvo: familia_geral {conjugeAtivo: null, exConjuges: Array(2), filhoSelecionado: 0, timestamp: '2025-09-02T13:56:51.142Z'}
+useFamiliaEstados.ts:187 Estado do ex-cônjuge 0 carregado: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 0 salvo: familia_ex_conjuge_0
+useFamiliaEstados.ts:172 Estado do ex-cônjuge 1 salvo: familia_ex_conjuge_1

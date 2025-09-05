@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Limpeza - Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .danger {
+            background: #dc3545;
+        }
+        .danger:hover {
+            background: #c82333;
+        }
+        .success {
+            background: #28a745;
+        }
+        .success:hover {
+            background: #218838;
+        }
+        #output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Teste de Limpeza - Debug do Layout Antigo</h1>
+        
+        <div>
+            <button onclick="verificarEstado()">📊 Verificar Estado Atual</button>
+            <button onclick="simularDadosAntigos()">🔄 Simular Dados Antigos</button>
+            <button onclick="forcarLimpeza()" class="danger">🧹 Forçar Limpeza Completa</button>
+            <button onclick="resetarTudo()" class="danger">💥 Reset Total</button>
+            <button onclick="limparOutput()" class="success">🗑️ Limpar Output</button>
+        </div>
+        
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+
+        function verificarEstado() {
+            log('=== VERIFICANDO ESTADO ATUAL ===');
+            
+            // Verificar versão
+            const versao = localStorage.getItem('secaoFamiliaVersao');
+            log(`Versão salva: ${versao || 'nenhuma'}`);
+            
+            // Listar todas as chaves
+            const chaves = Object.keys(localStorage);
+            log(`Total de chaves no localStorage: ${chaves.length}`);
+            
+            if (chaves.length > 0) {
+                log('Chaves encontradas:');
+                chaves.forEach(chave => {
+                    const valor = localStorage.getItem(chave);
+                    const tamanho = valor ? valor.length : 0;
+                    log(`  - ${chave} (${tamanho} chars)`);
+                });
+            }
+            
+            // Verificar padrões específicos
+            const padroes = [
+                'dadosFamiliares',
+                'familia',
+                'layout',
+                'secao',
+                '1.0',
+                'antigo'
+            ];
+            
+            log('\nVerificando padrões suspeitos:');
+            padroes.forEach(padrao => {
+                const encontradas = chaves.filter(chave => 
+                    chave.toLowerCase().includes(padrao.toLowerCase())
+                );
+                if (encontradas.length > 0) {
+                    log(`  - Padrão "${padrao}": ${encontradas.join(', ')}`);
+                }
+            });
+            
+            log('=== FIM DA VERIFICAÇÃO ===\n');
+        }
+
+        function simularDadosAntigos() {
+            log('=== SIMULANDO DADOS ANTIGOS ===');
+            
+            // Criar dados que deveriam ser detectados como antigos
+            localStorage.setItem('dadosFamiliares_1.0', JSON.stringify({versao: '1.0', dados: 'antigo'}));
+            localStorage.setItem('layoutFamilia', 'layout antigo');
+            localStorage.setItem('familiaConfig', 'config antigo');
+            localStorage.setItem('secaoFamiliaVersao', '1.0.0');
+            
+            log('Dados antigos simulados criados!');
+            log('Agora recarregue a página principal para testar a detecção.');
+            log('=== FIM DA SIMULAÇÃO ===\n');
+        }
+
+        function forcarLimpeza() {
+            log('=== FORÇANDO LIMPEZA COMPLETA ===');
+            
+            try {
+                // Simular a lógica de limpeza
+                const chaves = Object.keys(localStorage);
+                const chavesParaRemover = [];
+                
+                const padroes = [
+                    'dadosFamiliares',
+                    'familia',
+                    'layout',
+                    'secao',
+                    '1.0',
+                    'antigo',
+                    'old',
+                    'legacy'
+                ];
+                
+                chaves.forEach(chave => {
+                    const deveRemover = padroes.some(padrao => 
+                        chave.toLowerCase().includes(padrao.toLowerCase())
+                    );
+                    
+                    if (deveRemover) {
+                        chavesParaRemover.push(chave);
+                    }
+                });
+                
+                log(`Encontradas ${chavesParaRemover.length} chaves para remover:`);
+                chavesParaRemover.forEach(chave => {
+                    log(`  - Removendo: ${chave}`);
+                    localStorage.removeItem(chave);
+                });
+                
+                // Definir versão correta
+                localStorage.setItem('secaoFamiliaVersao', '2.0.0');
+                localStorage.setItem('limpezaCompleta_timestamp', Date.now().toString());
+                
+                log('Limpeza completa executada!');
+                log('Versão definida como 2.0.0');
+                
+            } catch (error) {
+                log(`Erro durante limpeza: ${error.message}`);
+            }
+            
+            log('=== FIM DA LIMPEZA ===\n');
+        }
+
+        function resetarTudo() {
+            log('=== RESET TOTAL ===');
+            
+            const confirmacao = confirm('Tem certeza que deseja limpar TUDO do localStorage?');
+            if (confirmacao) {
+                localStorage.clear();
+                sessionStorage.clear();
+                log('localStorage e sessionStorage completamente limpos!');
+                log('Recarregue a página principal para testar.');
+            } else {
+                log('Reset cancelado pelo usuário.');
+            }
+            
+            log('=== FIM DO RESET ===\n');
+        }
+
+        function limparOutput() {
+            document.getElementById('output').textContent = '';
+        }
+
+        // Verificar estado inicial
+        window.onload = function() {
+            log('🔧 Ferramenta de Debug de Limpeza carregada!');
+            log('Use os botões acima para diagnosticar o problema.\n');
+            verificarEstado();
+        };
+    </script>
+</body>
+</html>

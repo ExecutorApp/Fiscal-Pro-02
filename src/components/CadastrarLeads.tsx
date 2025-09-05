@@ -1,20 +1,19 @@
-import { ChevronLeftIcon, MenuIcon, XIcon } from '@components/icons';
-import { Button } from '@components/button';
-import { EmpresasScreen } from '@screens/empresas';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronLeft, Menu, X, ChevronDown } from 'lucide-react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import EmpresasScreen, { EmpresasScreenHandle } from './empresa/EmpresasScreen';
+import { SecaoFamiliaV2 } from './SecaoFamiliaV2';
+import { verificarDadosAntigos, migrarDadosParaNovaVersao } from '../utils/limparDadosAntigos';
+import { criarDadosFamiliaresVazios } from '../types/familia';
 
-import { SecaoFamiliaV2 } from '@components/secaoFamiliaV2';
+type CadastrarLeadsProps = {
+  onClose: () => void;
+  onLeadSaved?: (savedLead: any, action?: 'create' | 'edit') => void;
+  editingClient?: any;
+};
 
-import { validateCPF, validateCNPJ } from '@utils/validations';
-
-import { verificarDadosAntigos, migrarDadosParaNovaVersao } from '@utils/dadosAntigos';
-
-import { Card } from '@components/card';
-
-import { cadastrarLeads } from '@utils/cadastrarLeads';
-import type { EmpresasScreenHandle } from './empresa/EmpresasScreen';
-
-const CadastrarLeads = ({ onClose
-onLeadSaved, editingClient }: CadastrarLeadsProps) => {
+export default function CadastrarLeads({ onClose, onLeadSaved, editingClient }: CadastrarLeadsProps) {
   const [userPhoto, setUserPhoto] = useState("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB4PSIwIiB5PSIwIiB2aWV3Qm94PSIwIDAgNTMgNTMiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMiA1MTIiIHhtbDpzcGFjZT0icHJlc2VydmUiIGNsYXNzPSIiPjxnPjxwYXRoIGQ9Im0xOC42MTMgNDEuNTUyLTcuOTA3IDQuMzEzYTcuMTA2IDcuMTA2IDAgMCAwLTEuMjY5LjkwM0EyNi4zNzcgMjYuMzc3IDAgMCAwIDI2LjUgNTNjNi40NTQgMCAxMi4zNjctMi4zMSAxNi45NjQtNi4xNDRhNy4wMTUgNy4wMTUgMCAwIDAtMS4zOTQtLjkzNGwtOC40NjctNC4yMzNhMy4yMjkgMy4yMjkgMCAwIDEtMS43ODUtMi44ODh2LTMuMzIyYy4yMzgtLjI3MS41MS0uNjE5LjgwMS0xLjAzYTE5LjQ4MiAxOS40ODIgMCAwIDAgMi42MzItNS4zMDRjMS4wODYtLjMzNSAxLjg4Ni0xLjMzOCAxLjg4Ni0yLjUzdi0zLjU0NmMwLS43OC0uMzQ3LTEuNDc3LS44ODYtMS45NjV2LTUuMTI2czEuMDUzLTcuOTc3LTkuNzUtNy45NzctOS43NSA3Ljk3Ny05Ljc1IDcuOTc3djUuMTI2YTIuNjQ0IDIuNjQ0IDAgMCAwLS44ODYgMS45NjV2My41NDZjMCAuOTM0LjQ5MSAxLjc1NiAxLjIyNiAyLjIzMS44ODYgMy44NTcgMy4yMDYgNi42MzMgMy4yMDYgNi42MzN2My4yNGEzLjIzMiAzLjIzMiAwIDAgMS0xLjY4NCAyLjgzM3oiIHN0eWxlPSIiIGZpbGw9IiNlN2VjZWQiIGRhdGEtb3JpZ2luYWw9IiNlN2VjZWQiIGNsYXNzPSIiPjwvcGF0aD48cGF0aCBkPSJNMjYuOTUzLjAwNEMxMi4zMi0uMjQ2LjI1NCAxMS40MTQuMDA0IDI2LjA0Ny0uMTM4IDM0LjM0NCAzLjU2IDQxLjgwMSA5LjQ0OCA0Ni43NmE3LjA0MSA3LjA0MSAwIDAgMSAxLjI1Ny0uODk0bDcuOTA3LTQuMzEzYTMuMjMgMy4yMyAwIDAgMCAxLjY4My0yLjgzNXYtMy4yNHMtMi4zMjEtMi43NzYtMy4yMDYtNi42MzNhMi42NiAyLjY2IDAgMCAxLTEuMjI2LTIuMjMxdi0zLjU0NmMwLS43OC4zNDctMS40NzcuODg2LTEuOTY1di01LjEyNlMxNS42OTYgOCAyNi40OTkgOHM5Ljc1IDcuOTc3IDkuNzUgNy45Nzd2NS4xMjZjLjU0LjQ4OC44ODYgMS4xODUuODg2IDEuOTY1djMuNTQ2YzAgMS4xOTItLjggMi4xOTUtMS44ODYgMi41M2ExOS40ODIgMTkuNDgyIDAgMCAxLTIuNjMyIDUuMzA0Yy0uMjkxLjQxMS0uNTYzLjc1OS0uODAxIDEuMDNWMzguOGMwIDEuMjIzLjY5MSAyLjM0MiAxLjc4NSAyLjg4OGw4LjQ2NyA0LjIzM2E3LjA1IDcuMDUgMCAwIDEgMS4zOS45MzJjNS43MS00Ljc2MiA5LjM5OS0xMS44ODIgOS41MzYtMTkuOUM1My4yNDYgMTIuMzIgNDEuNTg3LjI1NCAyNi45NTMuMDA0eiIgc3R5bGU9IiIgZmlsbD0iIzU1NjA4MCIgZGF0YS1vcmlnaW5hbD0iIzU1NjA4MCIgY2xhc3M9IiI+PC9wYXRoPjwvZz48L3N2Zz4=");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const empresasRef = useRef<EmpresasScreenHandle>(null);
@@ -548,7 +547,7 @@ onLeadSaved, editingClient }: CadastrarLeadsProps) => {
         // Os dados da família são salvos automaticamente pelo SecaoFamiliaV2
 
       if (onLeadSaved) {
-        onLeadSaved(savedLead);
+        onLeadSaved(savedLead, editingClient ? 'edit' : 'create');
       }
 
       onClose();
@@ -705,7 +704,7 @@ onLeadSaved, editingClient }: CadastrarLeadsProps) => {
               onClick={() => setShowStateDropdown(!showStateDropdown)}
               className="absolute right-[12px] top-1/2 transform -translate-y-1/2 text-[#6B7280] hover:text-[#374151] transition-colors"
             >
-              <ChevronDownIcon size={20} />
+              <ChevronDown size={20} />
             </button>
             
             {showStateDropdown && (
@@ -944,7 +943,7 @@ onLeadSaved, editingClient }: CadastrarLeadsProps) => {
       `}</style>
 
       <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
-        <Card className="w-full max-w-[calc(100vw-20px)] h-[calc(100vh-20px)] overflow-hidden bg-white rounded-[16px] flex shadow-lg relative">
+        <div className="w-full max-w-[calc(100vw-20px)] h-[calc(100vh-20px)] overflow-hidden bg-white rounded-[16px] flex shadow-lg relative">
           
           {/* Menu Lateral */}
           <div className={`${isMenuExpanded ? 'w-[200px]' : 'w-[60px]'} bg-[#1777CF] flex flex-col transition-all duration-300 ease-in-out`}>
@@ -956,7 +955,7 @@ onLeadSaved, editingClient }: CadastrarLeadsProps) => {
                 className="absolute top-2 right-2 p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white z-10"
                 title={isMenuExpanded ? 'Recolher menu' : 'Expandir menu'}
               >
-                {isMenuExpanded ? <ChevronLeftIcon size={16} /> : <MenuIcon size={16} />}
+                {isMenuExpanded ? <ChevronLeft size={16} /> : <Menu size={16} />}
               </button>
               <div className={`flex flex-col items-center text-center transition-opacity duration-300 ${isMenuExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                  {/* Avatar */}
@@ -1070,7 +1069,7 @@ onLeadSaved, editingClient }: CadastrarLeadsProps) => {
                  onClick={handleCloseModal}
                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                >
-                 <XIcon size={20} />
+                 <X size={20} />
                </button>
              </div>
 
@@ -1106,7 +1105,7 @@ onLeadSaved, editingClient }: CadastrarLeadsProps) => {
                </div>
              </div>
            </div>
-         </Card>
+         </div>
        </div>
 
        {/* Modal de Confirmação */}
@@ -1128,4 +1127,23 @@ onLeadSaved, editingClient }: CadastrarLeadsProps) => {
              <p className="text-gray-600 text-center mb-6">
                Tem certeza que deseja cancelar? Todas as informações digitadas serão perdidas.
              </p>
-             <div className="flex
+             <div className="flex justify-end gap-3">
+               <button
+                 onClick={handleBackToForm}
+                 className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+               >
+                 Voltar e continuar editando
+               </button>
+               <button
+                 onClick={handleConfirmCancel}
+                 className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors"
+               >
+                 Descartar alterações
+               </button>
+             </div>
+           </div>
+         </div>
+       )}
+     </>
+   );
+}

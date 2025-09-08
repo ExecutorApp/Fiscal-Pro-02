@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { AbaDef, CampoDef, Empresa, EmpresasState, EstruturaEmpresas } from "./types";
 
+// Função para gerar UUID compatível com todos os ambientes
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 const STORAGE_KEY = "empresas_data_v1";
 
 const estruturaInicial: EstruturaEmpresas = {
@@ -51,7 +60,7 @@ export function useEmpresaStore() {
   }
 
   function adicionarEmpresa(nome: string) {
-    const nova: Empresa = { id: crypto.randomUUID(), nome, dados: {} };
+    const nova: Empresa = { id: generateUUID(), nome, dados: {} };
     setState((s) => ({
       ...s,
       empresas: [...s.empresas, nova],
@@ -95,7 +104,7 @@ export function useEmpresaStore() {
       ...s,
       estrutura: {
         ...s.estrutura,
-        abas: [...s.estrutura.abas, { id: crypto.randomUUID(), nome, campos: [] }],
+        abas: [...s.estrutura.abas, { id: generateUUID(), nome, campos: [] }],
       },
     }));
   }
@@ -136,7 +145,7 @@ export function useEmpresaStore() {
       estrutura: {
         ...s.estrutura,
         abas: s.estrutura.abas.map((a) =>
-          a.id === abaId ? { ...a, campos: [...a.campos, { ...campo, id: crypto.randomUUID() }] } : a
+          a.id === abaId ? { ...a, campos: [...a.campos, { ...campo, id: generateUUID() }] } : a
         ),
       },
     }));

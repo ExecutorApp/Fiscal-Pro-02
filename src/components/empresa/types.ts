@@ -1,14 +1,23 @@
 export type FieldType =
-  | "text"
-  | "number"
+  | "text" // legado
+  | "number" // legado
+  | "text_short"
+  | "text_long"
   | "date"
-  | "select"
-  | "checkbox"
+  | "cpf_cnpj"
   | "cpf"
   | "cnpj"
   | "telefone"
   | "email"
-  | "cep";
+  | "cep"
+  | "integer"
+  | "integer_text"
+  | "ie"
+  | "im"
+  | "regras_negocio"
+  | "select"
+  | "radio"
+  | "checkbox";
 
 export interface CampoDef {
   id: string;
@@ -18,6 +27,8 @@ export interface CampoDef {
   opcoes?: string[];
   // Validações simples
   obrigatorio?: boolean;
+  // Placeholder opcional para inputs/selects
+  placeholder?: string;
 }
 
 export interface AbaDef {

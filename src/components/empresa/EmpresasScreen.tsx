@@ -39,23 +39,25 @@ export const EmpresasScreen = forwardRef<EmpresasScreenHandle, {}>(function Empr
   }), []);
 
   return (
-    <div className="w-full h-full flex flex-col">
-      {/* Header fixo */}
+    <div className="w-full h-full flex flex-col bg-[#F1F5F9] rounded-md">
+      {/* Header fixo (mantemos minimalista pois o header superior já existe no modal principal) */}
       <div className="sticky top-0 z-10">
         <EmpresaHeader />
       </div>
 
       {/* Corpo com duas colunas 30% / 70% */}
-      <div className="flex-1 flex gap-[10px] p-[10px]" style={{ minHeight: 0 }}>
-        <EmpresasList
-          empresas={state.empresas}
-          selecionadaId={state.selecionadaId}
-          onSelecionar={(id) => selecionarEmpresa(id)}
-          onRenomear={renomearEmpresa}
-          onRemover={(id) => {
-            removerEmpresa(id);
-          }}
-        />
+      <div className="flex-1 flex gap-[12px] p-[12px]" style={{ minHeight: 0 }}>
+        <div className="w-[30%] h-full">
+          <EmpresasList
+            empresas={state.empresas}
+            selecionadaId={state.selecionadaId}
+            onSelecionar={(id) => selecionarEmpresa(id)}
+            onRenomear={renomearEmpresa}
+            onRemover={(id) => {
+              removerEmpresa(id);
+            }}
+          />
+        </div>
 
         <EmpresaDetails
           empresa={empresaSelecionada}

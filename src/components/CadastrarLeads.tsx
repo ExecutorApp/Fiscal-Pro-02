@@ -1063,6 +1063,20 @@ export default function CadastrarLeads({ onClose, onLeadSaved, editingClient }: 
                    >
                      Gerenciar Estrutura
                    </Button>
+                   <Button
+                     onClick={handleSaveLead}
+                     disabled={isSaving}
+                     className="bg-[#1777CF] hover:bg-[#1565C0] text-white"
+                   >
+                     {isSaving ? (
+                       <div className="flex items-center gap-2">
+                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                         {editingClient ? 'Atualizando...' : 'Salvando...'}
+                       </div>
+                     ) : (
+                       'Salvar'
+                     )}
+                   </Button>
                  </div>
                )}
                <button
@@ -1074,36 +1088,11 @@ export default function CadastrarLeads({ onClose, onLeadSaved, editingClient }: 
              </div>
 
              {/* Conteúdo com Scroll */}
-             <div className="flex-1 overflow-y-auto modern-scrollbar p-6">
+             <div className={`flex-1 overflow-y-auto modern-scrollbar ${activeSection !== 'empresas' ? 'p-6' : ''}`}>
                {renderSectionContent()}
              </div>
 
-             {/* Footer Fixo */}
-             <div className="border-t border-gray-200 p-4 bg-white">
-               <div className="flex justify-between items-center">
-                 <Button
-                   onClick={handleCancelClick}
-                   disabled={isSaving}
-                   className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                 >
-                   Cancelar
-                 </Button>
-                 <Button
-                   onClick={handleSaveLead}
-                   disabled={isSaving}
-                   className="px-6 py-2 bg-[#1777CF] hover:bg-[#1565C0] text-white rounded-lg transition-colors disabled:opacity-50"
-                 >
-                   {isSaving ? (
-                     <div className="flex items-center gap-2">
-                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                       {editingClient ? 'Atualizando...' : 'Salvando...'}
-                     </div>
-                   ) : (
-                     editingClient ? 'Salvar' : 'Salvar'
-                   )}
-                 </Button>
-               </div>
-             </div>
+
            </div>
          </div>
        </div>

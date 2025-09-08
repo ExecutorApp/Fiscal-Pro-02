@@ -25,7 +25,7 @@ export function FieldRenderer({ abaId, campo, valor, onChange }: FieldRendererPr
           {label}
           <Select value={valor ?? ""} onValueChange={onChange}>
             <SelectTrigger className="h-[40px]">
-              <SelectValue placeholder="Selecione" />
+              <SelectValue placeholder={campo.placeholder ?? "Selecione"} />
             </SelectTrigger>
             <SelectContent>
               {(campo.opcoes || []).map((op) => (
@@ -75,7 +75,7 @@ export function FieldRenderer({ abaId, campo, valor, onChange }: FieldRendererPr
           {label}
           <Input
             className="h-[40px]"
-            placeholder={`Digite ${campo.label.toLowerCase()}`}
+            placeholder={campo.placeholder ?? `Digite ${campo.label.toLowerCase()}`}
             value={valor || ""}
             onChange={(e) => onChange(e.target.value)}
           />

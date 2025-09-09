@@ -35,6 +35,19 @@
     display: none;
   }
 
+  /* Classe no-scrollbar para ocultar barras de rolagem */
+  .no-scrollbar {
+    /* Firefox */
+    scrollbar-width: none;
+    /* IE e Edge */
+    -ms-overflow-style: none;
+  }
+  
+  /* WebKit (Chrome, Safari, Edge baseado em Chromium) */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Estilos customizados para dropdown de regime de bens */
   .regime-bens-dropdown {
     appearance: none;

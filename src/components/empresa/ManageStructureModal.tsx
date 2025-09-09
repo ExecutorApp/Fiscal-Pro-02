@@ -280,21 +280,35 @@ export function ManageStructureModal({
           <div className="flex-1 bg-gray-50 p-6 overflow-hidden flex flex-col" style={{ height: '100%' }}>
             {/* Cabeçalho fictício e área de drop permanecem iguais */}
             <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-600">Dados principais (12)</span>
-                  <span className="text-sm text-gray-400">Fases (19)</span>
-                  <span className="text-sm text-gray-400">Atividades (180)</span>
-                  <span className="text-sm text-blue-600 font-medium">Formulários (06)</span>
+              <div className="self-stretch bg-neutral-50 rounded-xl shadow-[0px_2px_5px_0px_rgba(103,110,118,0.08),0px_1px_1px_0px_rgba(0,0,0,0.12)] inline-flex justify-between items-center gap-2.5 px-2">
+                <div className="flex-1 flex justify-start items-center gap-2.5 overflow-hidden">
+                  <div className="p-2.5 flex justify-center items-center">
+                    <div className="justify-center text-sky-600 text-base font-normal font-['Inter']">Dados principais</div>
+                  </div>
+                  <div className="p-2.5 flex justify-center items-center">
+                    <div className="justify-center text-slate-500 text-base font-normal font-['Inter']">Vídeos (18)</div>
+                  </div>
+                  <div className="p-2.5 flex justify-center items-center">
+                    <div className="justify-center text-slate-500 text-base font-normal font-['Inter']">Áudios (12)</div>
+                  </div>
+                  <div className="p-2.5 flex justify-center items-center">
+                    <div className="justify-center text-slate-500 text-base font-normal font-['Inter']">Documentos</div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button className="p-1 text-gray-400">
-                    <ChevronLeft size={16} />
-                  </button>
-                  <span className="text-sm text-gray-600">01 de 04</span>
-                  <button className="p-1 text-gray-400">
-                    <ChevronRight size={16} />
-                  </button>
+                <div className="flex justify-start items-center">
+                  <div data-svg-wrapper>
+                    <svg width="30" height="25" viewBox="0 0 30 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path fillRule="evenodd" clipRule="evenodd" d="M18.7208 6.7762C19.1036 7.1345 19.0912 7.70424 18.6931 8.04875L13.4428 12.5L18.6931 16.9513C19.0912 17.2958 19.1036 17.8655 18.7208 18.2238C18.338 18.5821 17.705 18.5933 17.3069 18.2487L11.3069 13.1487C11.1108 12.9791 11 12.7448 11 12.5C11 12.2552 11.1108 12.0209 11.3069 11.8513L17.3069 6.75125C17.705 6.40674 18.338 6.41791 18.7208 6.7762Z" fill="#1777CF" />
+                    </svg>
+                  </div>
+                  <div className="p-2.5 flex justify-center items-center">
+                    <div className="justify-center text-slate-500 text-base font-normal font-['Inter']">01 de 06</div>
+                  </div>
+                  <div data-svg-wrapper>
+                    <svg width="30" height="25" viewBox="0 0 30 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path fillRule="evenodd" clipRule="evenodd" d="M11.2792 6.7762C10.8964 7.1345 10.9088 7.70424 11.3069 8.04875L16.5572 12.5L11.3069 16.9513C10.9088 17.2958 10.8964 17.8655 11.2792 18.2238C11.662 18.5821 12.295 18.5933 12.6931 18.2487L18.6931 13.1487C18.8892 12.9791 19 12.7448 19 12.5C19 12.2552 18.8892 12.0209 18.6931 11.8513L12.6931 6.75125C12.295 6.40674 11.662 6.41791 11.2792 6.7762Z" fill="#1777CF" />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>

@@ -45,9 +45,9 @@ export const EmpresasScreen = forwardRef<EmpresasScreenHandle, {}>(function Empr
         <EmpresaHeader />
       </div>
 
-      {/* Corpo com duas colunas 30% / 70% */}
+      {/* Corpo com duas colunas flexíveis */}
       <div className="flex-1 flex gap-[12px] p-[12px]" style={{ minHeight: 0 }}>
-        <div className="w-[30%] h-full">
+        <div className="w-[30%] h-full flex flex-col">
           <EmpresasList
             empresas={state.empresas}
             selecionadaId={state.selecionadaId}

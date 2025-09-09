@@ -1088,7 +1088,7 @@ export default function CadastrarLeads({ onClose, onLeadSaved, editingClient }: 
              </div>
 
              {/* Conteúdo com Scroll */}
-             <div className={`flex-1 overflow-y-auto modern-scrollbar ${activeSection !== 'empresas' ? 'p-6' : ''}`}>
+             <div className={`flex-1 overflow-hidden ${activeSection !== 'empresas' ? 'p-6' : ''}`}>
                {renderSectionContent()}
              </div>
 

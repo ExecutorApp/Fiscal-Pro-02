@@ -8,6 +8,7 @@ import { Maximize2, RotateCw, ZoomIn, ZoomOut, RefreshCw, AlertCircle } from 'lu
 import { ImageMetadata, getImageURL, revokeImageURL } from '../../utils/dbImages';
 import FullscreenImageViewer from './FullscreenImageViewer';
 
+const DEBUG_IMG = false; // Logs de depuração do ImageViewer
 type ViewerState = 'idle' | 'loading' | 'success' | 'error';
 
 interface ImageViewerProps {
@@ -33,13 +34,46 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   const imgRef = useRef<HTMLImageElement>(null);
   const loadingControllerRef = useRef<AbortController | null>(null);
   const currentUrlRef = useRef<string>('');
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Funções auxiliares sem useCallback para evitar re-criações
   const cleanupUrl = () => {
-    if (currentUrlRef.current) {
-      revokeImageURL(currentUrlRef.current);
+    const url = currentUrlRef.current;
+    if (!url) return;
+
+    // Se não for blob, apenas zera o ponteiro
+    if (!url.startsWith('blob:')) {
+      if (DEBUG_IMG) console.log('[img] cleanupUrl: non-blob URL, skipping revoke', url);
       currentUrlRef.current = '';
+      return;
+    }
+
+    // Primeiro, desanexar do elemento <img> se ainda estiver apontando para a URL
+    try {
+      if (imgRef.current && imgRef.current.src === url) {
+        if (DEBUG_IMG) console.log('[img] cleanupUrl: clearing <img>.src antes de revogar', url);
+        imgRef.current.src = '';
+      }
+    } catch {}
+
+    // Zerar o ponteiro imediatamente
+    currentUrlRef.current = '';
+
+    // Revogar de forma adiada para evitar net::ERR_ABORTED
+    const doRevoke = () => {
+      try {
+        if (DEBUG_IMG) console.log('[img] cleanupUrl: revogando URL', url);
+        revokeImageURL(url);
+      } catch (e) {
+        if (DEBUG_IMG) console.warn('[img] cleanupUrl: erro ao revogar', e);
+      }
+    };
+
+    // Usa requestIdleCallback quando disponível, senão timeout mínimo
+    if (typeof (window as any).requestIdleCallback === 'function') {
+      (window as any).requestIdleCallback(doRevoke, { timeout: 500 });
+    } else {
+      setTimeout(doRevoke, 0);
     }
   };
 
@@ -83,26 +117,22 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
       // Usar getImageURL que carrega do IndexedDB ou fallback
       const { getImageURL } = await import('../../utils/dbImages');
       const finalUrl = await getImageURL(imageMetadata);
-      
-      // URL da imagem obtida
-      
+      if (DEBUG_IMG) console.log('[img] loadImage: URL obtida', finalUrl);
+
       // Definir a URL e aguardar o carregamento
       currentUrlRef.current = finalUrl;
       setSrc(finalUrl);
-      
-      // Se for dataUrl, definir sucesso imediatamente
+
       if (finalUrl.startsWith('data:')) {
-        // DataURL detectada, carregamento imediato
+        if (DEBUG_IMG) console.log('[img] loadImage: data URL -> success imediato');
         setState('success');
       } else {
-        // URL externa, aguardando carregamento
         // Timeout de segurança para evitar loop infinito
         timeoutRef.current = setTimeout(() => {
-          // Timeout atingido, assumindo sucesso
+          if (DEBUG_IMG) console.log('[img] loadImage: timeout de segurança atingido, marcando success');
           setState('success');
         }, 5000);
       }
-      
     } catch (err) {
       console.error('Erro ao carregar imagem:', err);
       setState('error');
@@ -130,8 +160,10 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      // Revogação segura da URL em desmontagem
       if (currentUrlRef.current) {
-        revokeImageURL(currentUrlRef.current);
+        if (DEBUG_IMG) console.log('[img] unmount: cleanupUrl');
+        cleanupUrl();
       }
     };
   }, []); // Cleanup direto sem dependências

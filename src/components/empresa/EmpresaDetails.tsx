@@ -4,6 +4,11 @@ import { Empresa, EstruturaEmpresas } from "./types";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import DropdownCustomizado from "../DropdownCustomizado";
 import UploadModal from './UploadModal';
+import EditBar from './EditBar';
+import RenameModal from './RenameModal';
+import ShareModal from './ShareModal';
+import LinkModal from './LinkModal';
+import DeleteModal from './DeleteModal';
 
 interface EmpresaDetailsProps {
   empresa: Empresa | null;
@@ -28,7 +33,7 @@ const ANEXOS_TABS = [
 ] as const;
 
 type FixedTabKey = typeof FIXED_TABS[number]["key"];
-type AnexosTabKey = typeof ANEXOS_TABS[number]["key"];
+export type AnexosTabKey = typeof ANEXOS_TABS[number]["key"];
 
 type Filtro = { produto: string; fase: string; atividade: string };
 const defaultFiltro: Filtro = { produto: "", fase: "", atividade: "" };
@@ -122,8 +127,81 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
     documentos: [],
     formularios: []
   });
+  // Seleção de arquivo para a barra de edição
+  const [selectedFileId, setSelectedFileId] = useState<number | null>(null);
+  // Modais de ação
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isLinkOpen, setIsLinkOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const updateFiltro = (tab: AnexosTabKey, patch: Partial<Filtro>) =>
     setFiltros((prev) => ({ ...prev, [tab]: { ...prev[tab], ...patch } }));
+
+  // Handlers para a EditBar
+  const handleRenameRequest = () => {
+    setIsRenameOpen(true);
+  };
+
+  const handleRenameSave = (newName: string) => {
+    if (selectedFileId) {
+      setUploadedFiles(prev => ({
+        ...prev,
+        [selectedAnexosTab]: prev[selectedAnexosTab].map(file => 
+          file.id === selectedFileId ? { ...file, name: newName } : file
+        )
+      }));
+    }
+    setIsRenameOpen(false);
+  };
+
+  const handleShareRequest = () => {
+    setIsShareOpen(true);
+  };
+
+  const handleLinkRequest = () => {
+    setIsLinkOpen(true);
+  };
+
+  const handleLinkSave = (linkData: any) => {
+    console.log('Link salvo:', linkData);
+    setIsLinkOpen(false);
+  };
+
+  const handleDownload = () => {
+    if (selectedFileId) {
+      const file = uploadedFiles[selectedAnexosTab].find(f => f.id === selectedFileId);
+      if (file && file.__file) {
+        const url = URL.createObjectURL(file.__file);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    }
+  };
+
+  const handleDeleteRequest = () => {
+    setIsDeleteOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedFileId) {
+      setUploadedFiles(prev => ({
+        ...prev,
+        [selectedAnexosTab]: prev[selectedAnexosTab].filter(file => file.id !== selectedFileId)
+      }));
+      setSelectedFileId(null);
+    }
+    setIsDeleteOpen(false);
+  };
+
+  // Obter arquivo selecionado para os modais
+  const selectedFile = selectedFileId 
+    ? uploadedFiles[selectedAnexosTab].find(f => f.id === selectedFileId)
+    : null;
 
   // Carregar filtros persistidos quando a empresa mudar
   useEffect(() => {
@@ -175,7 +253,7 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
 
   // Componente interno: filtros horizontais
   const Filtros = ({ tabKey }: { tabKey: AnexosTabKey }) => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 flex items-center">
       <DropdownCustomizado
         value={filtros[tabKey].produto}
         onChange={(v) => updateFiltro(tabKey, { produto: v })}
@@ -197,21 +275,144 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
     </div>
   );
 
+  // Utilitário: gerar miniatura (thumbnail) a partir do arquivo de vídeo
+  const generateVideoThumbnail = (file: File): Promise<string> => {
+    const DEBUG_THUMBS = true; // logs de depuração temporários
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.src = url;
+      video.muted = true;
+      (video as any).playsInline = true;
+
+      let finished = false;
+      let timeoutId: number | undefined;
+
+      const log = (...args: any[]) => { if (DEBUG_THUMBS) console.debug('[thumb]', ...args); };
+
+      const resolveOnce = (v: string) => {
+        if (finished) return; finished = true; log('resolve'); cleanup(true); resolve(v);
+      };
+      const rejectOnce = (e: any) => {
+        if (finished) return; finished = true; log('reject', e); cleanup(false); reject(e);
+      };
+
+      const cleanup = (ok: boolean) => {
+        try { video.pause?.(); } catch {}
+        try {
+          video.removeEventListener('loadedmetadata', onLoadedMeta as any);
+          video.removeEventListener('loadeddata', onLoadedData as any);
+          video.removeEventListener('seeked', onSeeked as any);
+        } catch {}
+        video.onerror = null;
+        // Importante: remover src e forçar load antes de revogar o URL
+        try { video.removeAttribute('src'); video.load(); } catch {}
+        if (timeoutId) window.clearTimeout(timeoutId);
+        // Para evitar net::ERR_ABORTED em alguns navegadores/HMR, atrasar a revogação
+        // Em casos extremos, a revogação prematura cancela leituras pendentes do blob
+        // e gera o erro no console. Um pequeno atraso (ou idle) resolve.
+        const revoke = () => { try { URL.revokeObjectURL(url); log('revoke'); } catch {} };
+        // Se disponível, usar requestIdleCallback; senão, atrasar 1500ms
+        // @ts-ignore
+        if (typeof window.requestIdleCallback === 'function') {
+          // @ts-ignore
+          window.requestIdleCallback(revoke, { timeout: 2000 });
+        } else {
+          window.setTimeout(revoke, ok ? 1500 : 2500);
+        }
+      };
+
+      const captureFrame = () => {
+        try {
+          const vw = Math.max(1, video.videoWidth || 320);
+          const vh = Math.max(1, video.videoHeight || 180);
+          const canvas = document.createElement('canvas');
+          canvas.width = vw;
+          canvas.height = vh;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) throw new Error('Canvas context not available');
+          ctx.drawImage(video, 0, 0, vw, vh);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          log('captured', { vw, vh });
+          resolveOnce(dataUrl);
+        } catch (e) {
+          rejectOnce(e);
+        }
+      };
+
+      const onSeeked = () => { log('seeked'); captureFrame(); };
+      const onLoadedMeta = () => {
+        try {
+          const d = isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
+          const pos = d ? Math.min(1, d * 0.1) : 0; // usa ~10% do vídeo, ou 0s se duração indisponível
+          log('loadedmetadata', { duration: d, pos });
+          video.currentTime = pos;
+        } catch (e) {
+          log('seek on metadata failed', e);
+          // fallback será tratado por loadeddata/timeout
+        }
+      };
+      const onLoadedData = () => {
+        log('loadeddata');
+        // Se seek não disparar a tempo, captura o primeiro frame após pequeno atraso
+        if (!timeoutId) {
+          timeoutId = window.setTimeout(() => {
+            if (!finished) captureFrame();
+          }, 1000);
+        }
+      };
+
+      video.addEventListener('loadedmetadata', onLoadedMeta, { once: true });
+      video.addEventListener('loadeddata', onLoadedData, { once: true });
+      video.addEventListener('seeked', onSeeked, { once: true });
+      video.onerror = (ev) => {
+        const err = (video as any).error; // MediaError
+        log('video.onerror', err);
+        rejectOnce(new Error('Falha ao carregar vídeo para gerar thumbnail'));
+      };
+
+      log('start', { url, name: file.name, size: file.size, type: file.type });
+    });
+  };
+
   // Função para lidar com upload de arquivos
-  const handleUpload = (files: File[], metadata: any) => {
-    const newFiles = files.map(file => ({
+  const handleUpload = async (files: File[], metadata: any) => {
+    const newFiles = files.map((file) => ({
       id: Date.now() + Math.random(),
       name: file.name,
       size: file.size,
       type: file.type,
       metadata,
-      uploadDate: new Date().toISOString()
+      uploadDate: new Date().toISOString(),
+      __file: file as File,
+      thumb: undefined as string | undefined,
     }));
 
-    setUploadedFiles(prev => ({
+    // Adiciona imediatamente (sem thumbnail) para feedback instantâneo
+    setUploadedFiles((prev) => ({
       ...prev,
-      [selectedAnexosTab]: [...prev[selectedAnexosTab], ...newFiles]
+      [selectedAnexosTab]: [...prev[selectedAnexosTab], ...newFiles],
     }));
+
+    // Gera thumbnails apenas para vídeos
+    if (selectedAnexosTab === 'videos') {
+      for (const f of newFiles) {
+        if (f.type?.startsWith('video/')) {
+          try {
+            const thumb = await generateVideoThumbnail(f.__file);
+            setUploadedFiles((prev) => ({
+              ...prev,
+              [selectedAnexosTab]: prev[selectedAnexosTab].map((it: any) =>
+                it.id === f.id ? { ...it, thumb } : it
+              ),
+            }));
+          } catch {
+            // mantém sem thumbnail se falhar
+          }
+        }
+      }
+    }
   };
 
   // Renderizador do conteúdo da aba Anexos
@@ -290,7 +491,7 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
     
     if (files.length === 0) {
       return (
-        <div className="border border-[#E5E7EB] bg-white rounded-[8px] m-[10px] flex-1 min-h-0 flex items-center justify-center">
+        <div className="bg-white rounded-[8px] my-[10px] flex-1 min-h-0 flex items-center justify-center">
           <div className="text-center text-gray-500">
             <div className="text-lg font-medium mb-2">
               {ANEXOS_TABS.find((t) => t.key === selectedAnexosTab)?.label}
@@ -308,61 +509,75 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
     }
 
     return (
-       <div className="border border-[#E5E7EB] bg-white rounded-[8px] m-[10px] flex-1 min-h-0 overflow-auto">
-         {/* Exibição estilo Windows Explorer - miniatura com foto do vídeo como capa */}
-         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-[10px]">
-           {files.map((file) => (
+       <div className="bg-white rounded-[8px] my-[10px] flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+         <div className="flex items-start gap-2 pl-[10px]">
+           {/* Barra de edição fixa (sticky) à esquerda */}
+           <div className="sticky top-0 self-start">
+             <EditBar
+               onRename={handleRenameRequest}
+               onShare={handleShareRequest}
+               onLink={handleLinkRequest}
+               onDownload={handleDownload}
+               onDelete={handleDeleteRequest}
+               disabled={!selectedFileId}
+             />
+           </div>
+
+           {/* Grade de cards */}
+           <div className="flex-1">
+             {/* Exibição estilo Windows Explorer - miniatura com foto do vídeo como capa */}
              <div 
-               key={file.id} 
-               className="group cursor-pointer select-none flex flex-col items-center hover:bg-blue-50 rounded-lg p-2 transition-all duration-200"
-               title={file.name}
+               className="grid grid-cols-[repeat(auto-fill,98px)] justify-start gap-[10px]"
+               onClick={(e) => {
+                 // Se o clique foi no contêiner da grade (não em um card), desseleciona
+                 if (e.target === e.currentTarget) {
+                   setSelectedFileId(null);
+                 }
+               }}
              >
-               {/* Miniatura estilo Windows Explorer com foto do vídeo como capa */}
-               <div className="relative mb-2">
-                 <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg border border-gray-300 overflow-hidden group-hover:shadow-lg group-hover:scale-105 transition-all duration-200">
-                   {selectedAnexosTab === 'videos' ? (
-                     <div className="w-full h-full bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center relative">
-                       <div className="text-3xl">🎬</div>
-                       <div className="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1 rounded">MP4</div>
+                {files.map((file) => (
+                  <div 
+                    key={file.id} 
+                    className="group cursor-pointer select-none flex flex-col items-center w-[98px] rounded-lg p-0 transition-all duration-200"
+                     title={file.name}
+                     onClick={(e) => {
+                       e.stopPropagation(); // Evita que o clique propague para o contêiner
+                       setSelectedFileId(file.id);
+                     }}
+                  >
+                   {/* Miniatura estilo Windows Explorer com frame do vídeo */}
+                    <div className="relative mb-2">
+                      <div className={`w-[96px] h-[96px] bg-white rounded-[6px] overflow-hidden shadow-sm transition-all ${selectedFileId === file.id ? 'ring-2 ring-[#2563EB]' : ''}`}>
+                       {selectedAnexosTab === 'videos' ? (
+                         file.thumb ? (
+                           <img src={file.thumb} alt={file.name} className="w-full h-full object-cover" />
+                         ) : (
+                           <div className="w-full h-full bg-gray-200 animate-pulse" />
+                         )
+                       ) : selectedAnexosTab === 'audios' ? (
+                         <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center relative">
+                           <div className="text-3xl">🎵</div>
+                         </div>
+                       ) : selectedAnexosTab === 'documentos' ? (
+                         <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center relative">
+                           <div className="text-3xl">📄</div>
+                         </div>
+                       ) : (
+                         <div className="w-full h-full bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center relative">
+                           <div className="text-3xl">📝</div>
+                         </div>
+                       )}
+                       {selectedAnexosTab === 'videos' && (
+                         <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] leading-none px-1 py-[2px] rounded">MP4</div>
+                       )}
                      </div>
-                   ) : selectedAnexosTab === 'audios' ? (
-                     <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center relative">
-                       <div className="text-3xl">🎵</div>
-                       <div className="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1 rounded">MP3</div>
-                     </div>
-                   ) : selectedAnexosTab === 'documentos' ? (
-                     <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center relative">
-                       <div className="text-3xl">📄</div>
-                       <div className="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1 rounded">PDF</div>
-                     </div>
-                   ) : (
-                     <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center relative">
-                       <div className="text-3xl">📋</div>
-                       <div className="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1 rounded">FORM</div>
-                     </div>
-                   )}
-                 </div>
-               </div>
-               
-               {/* Nome do arquivo abaixo da miniatura */}
-               <div className="text-center w-full">
-                 <div className="text-xs font-medium text-gray-900 leading-tight px-1">
-                   <div className="truncate" title={file.name}>
-                     {file.name.length > 14 ? `${file.name.substring(0, 11)}...` : file.name}
+                   </div>
+                   <div className="text-xs text-gray-700 text-center w-[98px] truncate" title={file.name}>
+                     {file.name}
                    </div>
                  </div>
-               </div>
+               ))}
              </div>
-           ))}
-         </div>
-         
-         {/* Informações de resumo simplificadas */}
-         <div className="mt-6 pt-4 border-t border-gray-200">
-           <div className="flex items-center justify-between text-sm text-gray-500">
-             <span>{files.length} arquivo(s) encontrado(s)</span>
-             <span>
-               Total: {(files.reduce((acc, file) => acc + file.size, 0) / 1024 / 1024).toFixed(1)} MB
-             </span>
            </div>
          </div>
        </div>
@@ -372,9 +587,9 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
   // Retorno principal: todo conteúdo no container branco com borda cinza clara
   return (
     <div className="flex-1 h-full flex flex-col min-w-0 overflow-hidden">
-      <div className="flex-1 border border-[#E5E7EB] bg-white rounded-[8px] flex flex-col overflow-hidden">
+      <div className="flex-1 bg-white rounded-[8px] flex flex-col overflow-hidden">
         {/* Header com carrossel de abas */}
-        <div className="flex items-center justify-between bg-[#F5F7FB] border-b border-[#E5E7EB] h-[48px] px-3">
+        <div className="flex items-center justify-between bg-[#F5F7FB] h-[48px] px-3">
           {/* Abas centralizadas */}
           <div className="flex-1 flex items-center justify-center">
             <div className="flex items-center gap-2">
@@ -432,7 +647,7 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
           {currentTab.key === "anexos" ? (
             <>
               {/* Filtros horizontais */}
-              <div className="p-3 border-b border-[#E5E7EB]">
+              <div className="p-3 border-b border-[#E5E7EB] flex items-center">
                 <Filtros tabKey={selectedAnexosTab} />
               </div>
 
@@ -492,6 +707,32 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
         onClose={() => setIsUploadModalOpen(false)}
         tabType={selectedAnexosTab}
         onUpload={handleUpload}
+      />
+
+      {/* Modais de Ação */}
+      <RenameModal
+        isOpen={isRenameOpen}
+        currentName={selectedFile?.name || ''}
+        onClose={() => setIsRenameOpen(false)}
+        onSave={handleRenameSave}
+      />
+
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+      />
+
+      <LinkModal
+        isOpen={isLinkOpen}
+        onClose={() => setIsLinkOpen(false)}
+        onSave={handleLinkSave}
+      />
+
+      <DeleteModal
+        isOpen={isDeleteOpen}
+        fileName={selectedFile?.name || ''}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDeleteConfirm}
       />
     </div>
   );

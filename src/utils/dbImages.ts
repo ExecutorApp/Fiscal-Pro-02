@@ -365,7 +365,20 @@ export const getImageURL = async (metadata: ImageMetadata): Promise<string> => {
  */
 export const revokeImageURL = (url: string): void => {
   if (url && url.startsWith('blob:')) {
-    URL.revokeObjectURL(url);
+    const doRevoke = () => {
+      try {
+        URL.revokeObjectURL(url);
+        // Log opcional (silencioso em prod)
+        try { console.debug('[revokeImageURL][scheduled] revoked', url); } catch {}
+      } catch {}
+    };
+
+    // Usa requestIdleCallback quando disponível, senão timeout mínimo
+    if (typeof (window as any) !== 'undefined' && typeof (window as any).requestIdleCallback === 'function') {
+      (window as any).requestIdleCallback(doRevoke, { timeout: 500 });
+    } else {
+      setTimeout(doRevoke, 0);
+    }
   }
 };
 

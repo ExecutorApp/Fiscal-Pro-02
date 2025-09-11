@@ -29,7 +29,7 @@ const FullscreenImageViewer: React.FC<FullscreenImageViewerProps> = ({
   
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const hideControlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hideControlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Reset do estado quando abrir
   useEffect(() => {

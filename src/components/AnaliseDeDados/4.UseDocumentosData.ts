@@ -122,7 +122,18 @@ export const useDocumentosData = (isOpen: boolean, activeTab: 'fisica' | 'juridi
       link.download = `gerenciar-documentos-backup-${new Date().toISOString().split('T')[0]}.json`;
       link.click();
       
-      URL.revokeObjectURL(url);
+      // Agendar revogação para evitar net::ERR_ABORTED
+      // @ts-ignore
+      if (typeof window.requestIdleCallback === 'function') {
+        // @ts-ignore
+        window.requestIdleCallback(() => {
+          try { URL.revokeObjectURL(url); } catch {}
+        }, { timeout: 2000 });
+      } else {
+        window.setTimeout(() => {
+          try { URL.revokeObjectURL(url); } catch {}
+        }, 1000);
+      }
       console.log('💾 Backup exportado com sucesso');
     } catch (error) {
       console.error('❌ Erro ao exportar dados:', error);
@@ -132,7 +143,10 @@ export const useDocumentosData = (isOpen: boolean, activeTab: 'fisica' | 'juridi
   // Carregar dados na inicialização
   useEffect(() => {
     if (isOpen) {
-      loadFromLocalStorage();
+      const fisica = loadFromLocalStorage(STORAGE_KEY_FISICA);
+      const juridica = loadFromLocalStorage(STORAGE_KEY_JURIDICA);
+      setFisicaData(fisica);
+      setJuridicaData(juridica);
     }
   }, [isOpen]);
 

@@ -18,7 +18,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({
   onClose
 }) => {
   const [showControls, setShowControls] = useState(true);
-  const hideControlsTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const hideControlsTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-hide dos controles
   const resetHideControlsTimer = useCallback(() => {
@@ -70,7 +70,18 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        // Substituir revogação imediata por agendada para evitar net::ERR_ABORTED
+        // @ts-ignore
+        if (typeof window.requestIdleCallback === 'function') {
+          // @ts-ignore
+          window.requestIdleCallback(() => {
+            try { URL.revokeObjectURL(url); } catch {}
+          }, { timeout: 2000 });
+        } else {
+          window.setTimeout(() => {
+            try { URL.revokeObjectURL(url); } catch {}
+          }, 1000);
+        }
       }
     }
     resetHideControlsTimer();

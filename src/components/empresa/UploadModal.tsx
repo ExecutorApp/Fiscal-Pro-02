@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Upload, FileText, Video, Music, FileImage, ChevronDown } from 'lucide-react';
 import type { AnexosTabKey } from './EmpresaDetails';
+import type { LucideIcon } from 'lucide-react';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -33,7 +34,7 @@ const ATIVIDADE_OPCOES = [
   { value: 'atividade3', label: 'Atividade 3' },
 ];
 
-const FILE_TYPE_CONFIG = {
+const FILE_TYPE_CONFIG: Record<AnexosTabKey, { title: string; icon: LucideIcon; accept: string; allowedTypes: string[]; description: string; }> = {
   videos: {
     title: 'Adicionar Vídeos',
     icon: Video,
@@ -261,7 +262,7 @@ export default function UploadModal({ isOpen, onClose, tabType, onUpload }: Uplo
               <h3 className="font-medium text-gray-900">Arquivos Selecionados</h3>
               <p className="text-sm text-gray-500">({selectedFiles.length} arquivo{selectedFiles.length !== 1 ? 's' : ''})</p>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 my-[10px] ">
+            <div className="flex-1 overflow-y-auto px-[10px] my-[10px] ">
               {selectedFiles.length === 0 ? (
                 <div className="text-center text-gray-500 py-8">
                   <p className="text-sm">Nenhum arquivo selecionado</p>

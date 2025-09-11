@@ -1,23 +1,46 @@
 import React from 'react';
 
 /**
- * Cache de URLs criadas para evitar vazamentos de memória
+ * Cache de URLs criadas com contagem de referências para evitar revogação prematura
  */
-const urlCache = new WeakMap<File | ArrayBuffer, string>();
+type UrlEntry = { url: string; refs: number };
+const urlCache = new WeakMap<File | ArrayBuffer, UrlEntry>();
 
 /**
- * Set para rastrear URLs que precisam ser limpas
+ * Set para rastrear URLs que precisam ser limpas (para revokeAll)
  */
 const urlsToCleanup = new Set<string>();
 
 /**
- * Converte File ou ArrayBuffer em blob URL com cache e cleanup automático
+ * Revogação adiada para evitar net::ERR_ABORTED durante desmontagem de elementos
+ */
+function scheduleRevoke(url: string) {
+  const doRevoke = () => {
+    try {
+      URL.revokeObjectURL(url);
+      try { console.debug('[revokeObjectURL][scheduled] revoked', { url }); } catch {}
+    } catch {}
+  };
+
+  // Usa requestIdleCallback quando disponível, senão timeout mínimo
+  if (typeof (window as any) !== 'undefined' && typeof (window as any).requestIdleCallback === 'function') {
+    (window as any).requestIdleCallback(doRevoke, { timeout: 500 });
+  } else {
+    setTimeout(doRevoke, 0);
+  }
+}
+
+/**
+ * Converte File ou ArrayBuffer em blob URL com cache e cleanup baseado em referência
  */
 export function toObjectURL(source: File | ArrayBuffer, mimeType?: string): string {
   // Verifica se já existe no cache
-  const cachedUrl = urlCache.get(source);
-  if (cachedUrl) {
-    return cachedUrl;
+  const entry = urlCache.get(source);
+  if (entry) {
+    entry.refs += 1;
+    // Log leve para depuração
+    try { console.debug('[toObjectURL] reuse', { refs: entry.refs, url: entry.url, source: source instanceof File ? { name: source.name, size: source.size, type: source.type } : { type: 'ArrayBuffer', bytes: (source as ArrayBuffer).byteLength } }); } catch {}
+    return entry.url;
   }
 
   let blob: Blob;
@@ -35,32 +58,51 @@ export function toObjectURL(source: File | ArrayBuffer, mimeType?: string): stri
   // Cria a URL
   const url = URL.createObjectURL(blob);
   
-  // Adiciona ao cache
-  urlCache.set(source, url);
+  // Adiciona ao cache com uma referência inicial
+  urlCache.set(source, { url, refs: 1 });
   
-  // Adiciona à lista de cleanup
+  // Adiciona à lista de cleanup total
   urlsToCleanup.add(url);
+
+  try { console.debug('[toObjectURL] create', { url, refs: 1, source: source instanceof File ? { name: source.name, size: source.size, type: source.type } : { type: 'ArrayBuffer', bytes: (source as ArrayBuffer).byteLength } }); } catch {}
   
   return url;
 }
 
 /**
- * Revoga uma URL específica e remove do cache
+ * Revoga uma URL específica e remove da lista de cleanup
+ * Observação: use com cautela. Prefira revokeObjectURLBySource para respeitar refcount.
  */
 export function revokeObjectURL(url: string): void {
-  URL.revokeObjectURL(url);
-  urlsToCleanup.delete(url);
+  try {
+    // Revogação adiada para evitar abort durante detach/unmount
+    scheduleRevoke(url);
+  } finally {
+    urlsToCleanup.delete(url);
+    try { console.debug('[revokeObjectURL] scheduled', { url }); } catch {}
+  }
 }
 
 /**
- * Revoga a URL associada a um source específico
+ * Libera a URL associada a um source específico respeitando contagem de referências
  */
 export function revokeObjectURLBySource(source: File | ArrayBuffer): void {
-  const url = urlCache.get(source);
-  if (url) {
-    URL.revokeObjectURL(url);
+  const entry = urlCache.get(source);
+  if (!entry) return;
+
+  if (entry.refs > 1) {
+    entry.refs -= 1;
+    try { console.debug('[revokeObjectURLBySource] release', { url: entry.url, refs: entry.refs, source: source instanceof File ? { name: source.name } : { type: 'ArrayBuffer' } }); } catch {}
+    return;
+  }
+
+  // Última referência: agendar revogação e limpar
+  try {
+    scheduleRevoke(entry.url);
+  } finally {
     urlCache.delete(source);
-    urlsToCleanup.delete(url);
+    urlsToCleanup.delete(entry.url);
+    try { console.debug('[revokeObjectURLBySource] scheduled revoke', { url: entry.url, refs: 0, source: source instanceof File ? { name: source.name } : { type: 'ArrayBuffer' } }); } catch {}
   }
 }
 
@@ -69,13 +111,15 @@ export function revokeObjectURLBySource(source: File | ArrayBuffer): void {
  */
 export function revokeAllObjectURLs(): void {
   urlsToCleanup.forEach(url => {
-    URL.revokeObjectURL(url);
+    try { scheduleRevoke(url); } catch {}
   });
   urlsToCleanup.clear();
+  // Não é possível limpar WeakMap diretamente, mas as entradas se perderão quando as chaves forem coletadas
+  try { console.debug('[revokeAllObjectURLs] all scheduled'); } catch {}
 }
 
 /**
- * Hook para React que gerencia automaticamente o cleanup
+ * Hook para React que gerencia automaticamente o cleanup por referência
  */
 export function useObjectURL(source: File | ArrayBuffer | null, mimeType?: string): string | null {
   const [url, setUrl] = React.useState<string | null>(null);

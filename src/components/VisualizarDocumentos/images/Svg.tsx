@@ -152,7 +152,18 @@ const SvgViewer: React.FC<ViewerProps> = ({
       document.body.removeChild(link);
       
       if (useInline && downloadUrl !== svgUrl) {
-        URL.revokeObjectURL(downloadUrl);
+        // Agendar revogação para evitar net::ERR_ABORTED
+        // @ts-ignore
+        if (typeof window.requestIdleCallback === 'function') {
+          // @ts-ignore
+          window.requestIdleCallback(() => {
+            try { URL.revokeObjectURL(downloadUrl); } catch {}
+          }, { timeout: 2000 });
+        } else {
+          window.setTimeout(() => {
+            try { URL.revokeObjectURL(downloadUrl); } catch {}
+          }, 1000);
+        }
       }
     }
   }, [svgUrl, fileName, onDownload, useInline, svgContent]);
@@ -284,7 +295,7 @@ const SvgViewer: React.FC<ViewerProps> = ({
         ) : (
           <img
             ref={imgRef}
-            src={svgUrl}
+            src={svgUrl ?? undefined}
             alt={fileName}
             style={{
               ...commonStyle,

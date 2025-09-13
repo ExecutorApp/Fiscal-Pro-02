@@ -3,7 +3,7 @@ import type { ViewerProps } from '../types';
 import ViewerShell from '../common/ViewerShell';
 import ExcelToolbar from '../common/ExcelToolbar';
 import { sourceToURL, revokeObjectURLBySource } from '../adapters/toObjectURL';
-import { FileText, Download, ExternalLink, Info, AlertCircle } from 'lucide-react';
+import { FileText, Download, ExternalLink, Info } from 'lucide-react';
 import mammoth from 'mammoth';
 
 interface FileInfo {
@@ -196,10 +196,10 @@ const WordViewer: React.FC<ViewerProps> = ({
     convertWordDocument();
   }, [convertWordDocument]);
 
-  // Toggle entre HTML e texto simples
-  const toggleView = useCallback(() => {
-    setShowRawText(prev => !prev);
-  }, [showRawText]);
+  // Toggle entre HTML e texto simples (desativado enquanto não for usado)
+  // const toggleView = useCallback(() => {
+  //   setShowRawText(prev => !prev);
+  // }, [showRawText]);
 
   // Funções de controle de zoom
   const handleZoomIn = useCallback(() => {

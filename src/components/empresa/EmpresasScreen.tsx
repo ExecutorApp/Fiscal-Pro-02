@@ -12,6 +12,8 @@ export type EmpresasScreenHandle = {
 };
 
 export const EmpresasScreen = forwardRef<EmpresasScreenHandle, {}>(function EmpresasScreen(_, ref) {
+  console.log('🏢 [DEBUG] EmpresasScreen montado');
+  
   const {
     state,
     empresaSelecionada,
@@ -29,6 +31,8 @@ export const EmpresasScreen = forwardRef<EmpresasScreenHandle, {}>(function Empr
     removerCampo,
     moverCampo,
   } = useEmpresaStore();
+
+  console.log('🏢 [DEBUG] EmpresasScreen - empresa selecionada:', empresaSelecionada?.id);
 
   const [modalAddOpen, setModalAddOpen] = useState(false);
   const [modalEstruturaOpen, setModalEstruturaOpen] = useState(false);

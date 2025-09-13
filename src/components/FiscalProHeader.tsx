@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { BancoDeDados } from './BancoDeDados'
 import { ResetarSistema } from './ResetarSistema'
-
+import { cacheInstance as indexedDBCache } from '../utils/IndexedDBCache'
 
 /*
 --------------------------------------------------------
@@ -17,9 +17,12 @@ import { ResetarSistema } from './ResetarSistema'
 */
 
 export const FiscalProHeader: React.FC = () => {
-  // Estado para controlar se o modal está aberto
+  console.log('🏗️ [DEBUG] FiscalProHeader renderizado');
+  
+  // Estados para controlar os modais
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isResetModalOpen, setIsResetModalOpen] = useState(false)
+  const [showSaveNotification, setShowSaveNotification] = useState(false)
 
   /*
   --------------------------------------------------------
@@ -29,8 +32,8 @@ export const FiscalProHeader: React.FC = () => {
     - Controla o estado isModalOpen
   */
   const handleDatabaseClick = () => {
+    console.log('Ícone do banco de dados clicado')
     setIsModalOpen(true)
-    console.log('Modal do banco de dados aberto')
   }
 
   /*
@@ -44,17 +47,17 @@ export const FiscalProHeader: React.FC = () => {
     setIsModalOpen(false)
     console.log('Modal do banco de dados fechado')
   }
-  
-   /*
+
+ /*
  --------------------------------------------------------
    Função: Abrir Modal de Resetar Sistema
  --------------------------------------------------------
-   - Abre o modal de confirmação para resetar
+   - Abre o modal de resetar sistema
    - Controla o estado isResetModalOpen
  */
  const handleOpenResetModal = () => {
+   console.log('Botão resetar clicado')
    setIsResetModalOpen(true)
-   console.log('Modal de resetar sistema aberto')
  }
 
  /*
@@ -69,6 +72,106 @@ export const FiscalProHeader: React.FC = () => {
    console.log('Modal de resetar sistema fechado')
  }
 
+ /*
+ --------------------------------------------------------
+   Função: Salvar Dados da Seção Empresas
+ --------------------------------------------------------
+   - Salva todos os dados da seção Empresas no IndexedDB
+   - Exibe notificação de sucesso
+   - Integra com o sistema de cache existente
+ */
+ const handleSaveEmpresasData = async () => {
+   console.log('🔥 [DEBUG] FUNÇÃO SALVAR CHAMADA - INÍCIO');
+   alert('Botão Salvar foi clicado!'); // Alerta temporário para debug
+   console.log('💾 [DEBUG] ========== BOTÃO SALVAR CLICADO ==========');
+   console.log('💾 [DEBUG] Verificando se estamos na seção empresas...');
+   
+   // Verificar se estamos na seção empresas
+   const empresasSection = document.querySelector('[data-section="empresas"]');
+   console.log('💾 [DEBUG] Elemento empresas encontrado:', !!empresasSection);
+   
+   if (!empresasSection) {
+     console.log('❌ [DEBUG] Não estamos na seção empresas, abortando salvamento');
+     return;
+   }
+   
+   console.log('✅ [DEBUG] Estamos na seção empresas, iniciando salvamento...');
+   
+   try {
+     console.log('📊 [DEBUG] Coletando dados da seção empresas...');
+     
+     // Coletar dados dos vídeos
+     const videosData = document.querySelectorAll('[data-video-item]');
+     console.log('🎥 [DEBUG] Vídeos encontrados:', videosData.length);
+     
+     const videos = Array.from(videosData).map((video, index) => {
+       const videoData = {
+         id: video.getAttribute('data-video-id') || `video-${index}`,
+         name: video.getAttribute('data-video-name') || `Video ${index + 1}`,
+         url: video.getAttribute('data-video-url') || '',
+         type: 'video',
+         timestamp: new Date().toISOString()
+       };
+       console.log(`🎥 [DEBUG] Video ${index + 1}:`, videoData);
+       return videoData;
+     });
+   
+     // Coletar dados dos formulários
+     const formsData = document.querySelectorAll('input, select, textarea');
+     console.log('📝 [DEBUG] Campos de formulário encontrados:', formsData.length);
+     
+     const formValues: Record<string, any> = {};
+     formsData.forEach((field: any) => {
+       if (field.name || field.id) {
+         const key = field.name || field.id;
+         formValues[key] = field.value;
+         console.log(`📝 [DEBUG] Campo ${key}:`, field.value);
+       }
+     });
+   
+     // Preparar dados para salvamento
+     const empresasData = {
+       id: 'empresas-section',
+       type: 'empresas',
+       timestamp: new Date().toISOString(),
+       data: {
+         videos,
+         formValues,
+         metadata: {
+           totalVideos: videos.length,
+           totalFields: Object.keys(formValues).length,
+           lastSaved: new Date().toISOString()
+         }
+       }
+     };
+   
+     console.log('💾 [DEBUG] Dados preparados para salvamento:', empresasData);
+     console.log('💾 [DEBUG] Tentando salvar no IndexedDB...');
+     
+     // Salvar no IndexedDB
+     await indexedDBCache.saveFile('empresas-data', empresasData);
+     console.log('✅ [DEBUG] Dados salvos com sucesso no IndexedDB');
+     
+     // Verificar se foi salvo corretamente
+     const savedData = await indexedDBCache.getFile('empresas-data');
+     console.log('🔍 [DEBUG] Verificação - dados recuperados:', savedData);
+     
+     // Mostrar notificação de sucesso
+     setShowSaveNotification(true);
+     console.log('🎉 [DEBUG] Notificação de sucesso exibida');
+     
+     setTimeout(() => {
+       setShowSaveNotification(false);
+       console.log('🎉 [DEBUG] Notificação de sucesso ocultada');
+     }, 3000);
+     
+   } catch (error) {
+     console.error('❌ [DEBUG] Erro ao salvar dados:', error);
+     console.error('❌ [DEBUG] Stack trace:', error.stack);
+   }
+ };
+
+ console.log('🔧 [DEBUG] handleSaveEmpresasData definida:', typeof handleSaveEmpresasData);
 
   return (
     <>
@@ -101,6 +204,21 @@ export const FiscalProHeader: React.FC = () => {
 
           .database-icon:hover {
             opacity: 0.8;
+          }
+
+          .save-notification {
+            animation: slideDown 0.3s ease-out;
+          }
+
+          @keyframes slideDown {
+            from {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
         `}</style>
 
@@ -152,14 +270,33 @@ export const FiscalProHeader: React.FC = () => {
 		  
 		           {/*
          --------------------------------------------------------
-           Botões à Direita - Notificação e Resetar
+           Botões à Direita - Salvar, Notificação e Resetar
          --------------------------------------------------------
+         - Botão "Salvar" para seção Empresas
          - Ícone de notificação (visual apenas)
          - Botão "Resetar" funcional
          - Posicionamento absoluto à direita
          - Design consistente com o estilo da aplicação
          */}
          <div className="absolute right-[40px] top-1/2 transform -translate-y-1/2 flex items-center gap-[12px]">
+           
+           {/* Botão Salvar */}
+           <div className="relative">
+             <button
+               onClick={handleSaveEmpresasData}
+               className="px-[16px] py-[8px] bg-[#1777CF] hover:bg-[#1565C0] text-white text-[14px] font-medium rounded-[8px] transition-colors duration-200 font-inter"
+               title="Salvar dados da seção Empresas"
+             >
+               Salvar
+             </button>
+             
+             {/* Notificação de sucesso */}
+             {showSaveNotification && (
+               <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-3 py-2 bg-[#10B981] text-white text-[12px] font-medium rounded-[6px] whitespace-nowrap z-[9999] save-notification">
+                 Salvo com sucesso
+               </div>
+             )}
+           </div>
            
            {/* Botão de Notificação (Visual apenas) */}
            <button

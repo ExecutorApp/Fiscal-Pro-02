@@ -16,8 +16,8 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, message = "Tem certez
         <div className="text-lg font-semibold mb-2">Excluir</div>
         <div className="text-sm text-gray-700 mb-4">{message}</div>
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-3 py-2 rounded border">Cancelar</button>
-          <button onClick={onConfirm} className="px-3 py-2 rounded bg-red-600 text-white">Excluir</button>
+          <button onClick={onClose} className="px-[25px] py-2 rounded border">Cancelar</button>
+          <button onClick={onConfirm} className="px-[25px] py-2 rounded bg-red-600 text-white">Excluir</button>
         </div>
       </div>
     </div>

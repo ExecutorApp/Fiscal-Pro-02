@@ -22,6 +22,14 @@ export default function CadastrarLeads({ onClose, onLeadSaved, editingClient }: 
   const [activeSection, setActiveSection] = useState('dados-pessoais');
   const [isMenuExpanded, setIsMenuExpanded] = useState(true);
   
+  // Log para rastrear mudanças de seção
+  useEffect(() => {
+    console.log('📍 [DEBUG] CadastrarLeads - activeSection mudou para:', activeSection);
+    if (activeSection === 'empresas') {
+      console.log('🏢 [DEBUG] Seção empresas ativada!');
+    }
+  }, [activeSection]);
+  
   // Estados do formulário
   const [userNameState, setUserNameState] = useState("");
   const [cpfCnpjState, setCpfCnpjState] = useState("");
@@ -808,8 +816,9 @@ export default function CadastrarLeads({ onClose, onLeadSaved, editingClient }: 
           </div>
         );
       case 'empresas':
+        console.log('🏢 [DEBUG] Seção empresas ativada - renderizando EmpresasScreen');
         return (
-          <div className="h-full">
+          <div className="h-full" data-section="empresas">
             <EmpresasScreen ref={empresasRef} />
           </div>
         );

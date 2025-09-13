@@ -1,7 +1,7 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { FieldRenderer } from "./FieldRenderer";
 import { Empresa, EstruturaEmpresas } from "./types";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, HardDrive, Check } from "lucide-react";
 import DropdownCustomizado from "../DropdownCustomizado";
 import UploadModal from './UploadModal';
 import EditBar from './EditBar';
@@ -9,6 +9,8 @@ import RenameModal from './RenameModal';
 import ShareModal from './ShareModal';
 import LinkModal from './LinkModal';
 import DeleteModal from './DeleteModal';
+import CacheManager from '../CacheManager';
+import { cacheInstance as indexedDBCache } from '../../utils/IndexedDBCache';
 
 interface EmpresaDetailsProps {
   empresa: Empresa | null;
@@ -32,36 +34,114 @@ const ANEXOS_TABS = [
   { key: "formularios", label: "Formulários", count: 0 },
 ] as const;
 
-type FixedTabKey = typeof FIXED_TABS[number]["key"];
+// removed: FixedTabKey (não utilizado)
 export type AnexosTabKey = typeof ANEXOS_TABS[number]["key"];
 
 type Filtro = { produto: string; fase: string; atividade: string };
-const defaultFiltro: Filtro = { produto: "", fase: "", atividade: "" };
+const defaultFiltro: Filtro = { produto: "todos", fase: "todas", atividade: "todas" };
 
-// Opções mockadas para os três filtros (poderão ser integradas futuramente)
+// Estrutura hierárquica dos filtros
 const PRODUTO_OPCOES = [
-  { value: "", label: "----------" },
-  { value: "p1", label: "Todos" },
-  { value: "p2", label: "Holding Patrimonial" },
-  { value: "p3", label: "Ativos Fundiários" },
-  { value: "p4", label: "Planejamento Tributário" },
+  { value: "todos", label: "Todos" },
+  { value: "hp", label: "Holding Patrimonial" },
+  { value: "af", label: "Ativos Fundiários" },
+  { value: "pt", label: "Planejamento Tributário" },
 ];
 
 const FASE_OPCOES = [
-  { value: "", label: "----------" },
-  { value: "f1", label: "Todas" },
-  { value: "f2", label: "Fase 01" },
-  { value: "f3", label: "Fase 02" },
-  { value: "f4", label: "Fase 03" },
+  { value: "todas", label: "Todas" },
+  { value: "hp-f01", label: "HP - Fase 01" },
+  { value: "hp-f02", label: "HP - Fase 02" },
+  { value: "hp-f03", label: "HP - Fase 03" },
+  { value: "af-f01", label: "AF - Fase 01" },
+  { value: "af-f02", label: "AF - Fase 02" },
+  { value: "af-f03", label: "AF - Fase 03" },
+  { value: "pt-f01", label: "PT - Fase 01" },
+  { value: "pt-f02", label: "PT - Fase 02" },
+  { value: "pt-f03", label: "PT - Fase 03" },
 ];
 
 const ATIVIDADE_OPCOES = [
-  { value: "", label: "----------" },
-  { value: "a1", label: "Todas" },
-  { value: "a2", label: "Atividade 01" },
-  { value: "a3", label: "Atividade 02" },
-  { value: "a4", label: "Atividade 03" },
+  { value: "todas", label: "Todas" },
+  { value: "hp-f01-a01", label: "HP/F01 - Atividade 01" },
+  { value: "hp-f01-a02", label: "HP/F01 - Atividade 02" },
+  { value: "hp-f01-a03", label: "HP/F01 - Atividade 03" },
+  { value: "hp-f02-a01", label: "HP/F02 - Atividade 01" },
+  { value: "hp-f02-a02", label: "HP/F02 - Atividade 02" },
+  { value: "hp-f02-a03", label: "HP/F02 - Atividade 03" },
+  { value: "hp-f03-a01", label: "HP/F03 - Atividade 01" },
+  { value: "hp-f03-a02", label: "HP/F03 - Atividade 02" },
+  { value: "hp-f03-a03", label: "HP/F03 - Atividade 03" },
+  { value: "af-f01-a01", label: "AF/F01 - Atividade 01" },
+  { value: "af-f01-a02", label: "AF/F01 - Atividade 02" },
+  { value: "af-f01-a03", label: "AF/F01 - Atividade 03" },
+  { value: "af-f02-a01", label: "AF/F02 - Atividade 01" },
+  { value: "af-f02-a02", label: "AF/F02 - Atividade 02" },
+  { value: "af-f02-a03", label: "AF/F02 - Atividade 03" },
+  { value: "af-f03-a01", label: "AF/F03 - Atividade 01" },
+  { value: "af-f03-a02", label: "AF/F03 - Atividade 02" },
+  { value: "af-f03-a03", label: "AF/F03 - Atividade 03" },
+  { value: "pt-f01-a01", label: "PT/F01 - Atividade 01" },
+  { value: "pt-f01-a02", label: "PT/F01 - Atividade 02" },
+  { value: "pt-f01-a03", label: "PT/F01 - Atividade 03" },
+  { value: "pt-f02-a01", label: "PT/F02 - Atividade 01" },
+  { value: "pt-f02-a02", label: "PT/F02 - Atividade 02" },
+  { value: "pt-f02-a03", label: "PT/F02 - Atividade 03" },
+  { value: "pt-f03-a01", label: "PT/F03 - Atividade 01" },
+  { value: "pt-f03-a02", label: "PT/F03 - Atividade 02" },
+  { value: "pt-f03-a03", label: "PT/F03 - Atividade 03" },
 ];
+
+// Funções auxiliares para extrair relacionamentos hierárquicos
+const extractProdutoFromFase = (faseValue: string): string => {
+  if (faseValue === "todas" || !faseValue) return "todos";
+  const [produto] = faseValue.split("-");
+  return produto;
+};
+
+const extractProdutoFromAtividade = (atividadeValue: string): string => {
+  if (atividadeValue === "todas" || !atividadeValue) return "todos";
+  const [produto] = atividadeValue.split("-");
+  return produto;
+};
+
+const extractFaseFromAtividade = (atividadeValue: string): string => {
+  if (atividadeValue === "todas" || !atividadeValue) return "todas";
+  const parts = atividadeValue.split("-");
+  if (parts.length >= 2) {
+    return `${parts[0]}-${parts[1]}`;
+  }
+  return "todas";
+};
+
+const getFilteredFases = (produtoValue: string) => {
+  if (produtoValue === "todos" || !produtoValue) {
+    return FASE_OPCOES;
+  }
+  return FASE_OPCOES.filter(fase => 
+    fase.value === "todas" || fase.value.startsWith(produtoValue + "-")
+  );
+};
+
+const getFilteredAtividades = (produtoValue: string, faseValue: string) => {
+  if (produtoValue === "todos" && faseValue === "todas") {
+    return ATIVIDADE_OPCOES;
+  }
+  
+  if (faseValue !== "todas" && faseValue) {
+    return ATIVIDADE_OPCOES.filter(atividade => 
+      atividade.value === "todas" || atividade.value.startsWith(faseValue + "-")
+    );
+  }
+  
+  if (produtoValue !== "todos" && produtoValue) {
+    return ATIVIDADE_OPCOES.filter(atividade => 
+      atividade.value === "todas" || atividade.value.startsWith(produtoValue + "-")
+    );
+  }
+  
+  return ATIVIDADE_OPCOES;
+};
 
 // Persistência local por Empresa + Aba
 const FILTERS_STORAGE_PREFIX = "empresas_filtros_v1";
@@ -107,6 +187,8 @@ function saveFiltersToStorage(empresaId: string, filtros: Record<AnexosTabKey, F
 }
 
 export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDetailsProps) {
+  console.log('🏢 [DEBUG] EmpresaDetails renderizado - empresa:', empresa?.id);
+  
   // Estado para o carrossel de abas do header
   const [currentTabIndex, setCurrentTabIndex] = useState<number>(0);
   const currentTab = FIXED_TABS[currentTabIndex];
@@ -127,15 +209,91 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
     documentos: [],
     formularios: []
   });
+  
+  console.log('🎥 [DEBUG] Estado atual uploadedFiles:', uploadedFiles);
+  
+  // Estado para metadados de arquivos
+  const [fileMetadata, setFileMetadata] = useState<Record<number, { produto: string; fase: string; atividade: string }>>({})
   // Seleção de arquivo para a barra de edição
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null);
+  
+  // Estados para seleção múltipla
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<Set<number>>(new Set());
+  
   // Modais de ação
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isLinkOpen, setIsLinkOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const updateFiltro = (tab: AnexosTabKey, patch: Partial<Filtro>) =>
-    setFiltros((prev) => ({ ...prev, [tab]: { ...prev[tab], ...patch } }));
+  const [isCacheManagerOpen, setIsCacheManagerOpen] = useState(false);
+  const updateFiltro = (tab: AnexosTabKey, patch: Partial<Filtro>) => {
+    setFiltros((prev) => {
+      const newFiltros = { ...prev, [tab]: { ...prev[tab], ...patch } };
+      
+      // Lógica hierárquica dos dropdowns
+      if (patch.produto !== undefined) {
+        if (patch.produto === 'todos') {
+          // Produto "Todos" -> Fase e Atividade ficam "Todas"
+          newFiltros[tab].fase = 'todas';
+          newFiltros[tab].atividade = 'todas';
+        } else {
+          // Produto específico selecionado -> filtrar fases e atividades
+          const fasesFiltradas = getFilteredFases(patch.produto);
+          const atividadesFiltradas = getFilteredAtividades(patch.produto, 'todas');
+          
+          // Se a fase atual não pertence ao produto selecionado, resetar para "Todas"
+          if (newFiltros[tab].fase !== 'todas' && !fasesFiltradas.includes(newFiltros[tab].fase)) {
+            newFiltros[tab].fase = 'todas';
+          }
+          
+          // Se a atividade atual não pertence ao produto selecionado, resetar para "Todas"
+          if (newFiltros[tab].atividade !== 'todas' && !atividadesFiltradas.includes(newFiltros[tab].atividade)) {
+            newFiltros[tab].atividade = 'todas';
+          }
+        }
+      }
+      
+      if (patch.fase !== undefined) {
+        if (patch.fase === 'todas') {
+          // Fase "Todas" -> Atividade fica "Todas"
+          newFiltros[tab].atividade = 'todas';
+        } else {
+          // Fase específica selecionada -> preencher produto automaticamente
+          const produtoVinculado = extractProdutoFromFase(patch.fase);
+          if (produtoVinculado && newFiltros[tab].produto === 'todos') {
+            newFiltros[tab].produto = produtoVinculado;
+          }
+          
+          // Filtrar atividades da fase selecionada
+          const atividadesFiltradas = getFilteredAtividades(newFiltros[tab].produto, patch.fase);
+          
+          // Se a atividade atual não pertence à fase selecionada, resetar para "Todas"
+          if (newFiltros[tab].atividade !== 'todas' && !atividadesFiltradas.includes(newFiltros[tab].atividade)) {
+            newFiltros[tab].atividade = 'todas';
+          }
+        }
+      }
+      
+      if (patch.atividade !== undefined) {
+        if (patch.atividade !== 'todas') {
+          // Atividade específica selecionada -> preencher produto e fase automaticamente
+          const produtoVinculado = extractProdutoFromAtividade(patch.atividade);
+          const faseVinculada = extractFaseFromAtividade(patch.atividade);
+          
+          if (produtoVinculado) {
+            newFiltros[tab].produto = produtoVinculado;
+          }
+          
+          if (faseVinculada) {
+            newFiltros[tab].fase = faseVinculada;
+          }
+        }
+      }
+      
+      return newFiltros;
+    });
+  };
 
   // Handlers para a EditBar
   const handleRenameRequest = () => {
@@ -162,23 +320,67 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
     setIsLinkOpen(true);
   };
 
-  const handleLinkSave = (linkData: any) => {
-    console.log('Link salvo:', linkData);
+  const handleLinkSave = (linkData: { produto: string; fase: string; atividade: string }) => {
+    console.log('🔗 [DEBUG] Link salvo:', linkData);
+    
+    if (selectedFileId) {
+      // Atualizar os metadados do arquivo específico
+      setFileMetadata(prev => ({
+        ...prev,
+        [selectedFileId]: {
+          produto: linkData.produto,
+          fase: linkData.fase,
+          atividade: linkData.atividade
+        }
+      }));
+      
+      console.log('🔗 [DEBUG] Metadados atualizados para arquivo ID:', selectedFileId);
+    }
+    
     setIsLinkOpen(false);
   };
 
   const handleDownload = () => {
     if (selectedFileId) {
       const file = uploadedFiles[selectedAnexosTab].find(f => f.id === selectedFileId);
-      if (file && file.__file) {
-        const url = URL.createObjectURL(file.__file);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = file.name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+      
+      console.log('📥 [DEBUG] Tentativa de download:', {
+        fileId: selectedFileId,
+        file: file,
+        hasFile: !!file,
+        hasFileObject: !!(file && file.__file),
+        fileObjectType: file && file.__file ? typeof file.__file : 'undefined',
+        isFileInstance: file && file.__file instanceof File
+      });
+      
+      if (file) {
+        // Verificar se file.__file existe e é uma instância válida de File
+        if (file.__file && file.__file instanceof File) {
+          try {
+            const url = URL.createObjectURL(file.__file);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = file.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            console.log('✅ [DEBUG] Download realizado com sucesso');
+          } catch (error) {
+            console.error('❌ [DEBUG] Erro ao criar URL do objeto:', error);
+            alert('Erro ao baixar o arquivo. Tente novamente.');
+          }
+        } else {
+          console.warn('⚠️ [DEBUG] Arquivo não possui objeto File válido:', {
+            fileName: file.name,
+            fileObject: file.__file,
+            fileType: typeof file.__file
+          });
+          alert('Este arquivo não pode ser baixado pois foi carregado de uma sessão anterior. Por favor, faça o upload novamente.');
+        }
+      } else {
+        console.error('❌ [DEBUG] Arquivo não encontrado para ID:', selectedFileId);
+        alert('Arquivo não encontrado.');
       }
     }
   };
@@ -198,6 +400,35 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
     setIsDeleteOpen(false);
   };
 
+  // Handlers para seleção múltipla
+  const handleToggleMultiSelect = () => {
+    setIsMultiSelectMode(!isMultiSelectMode);
+    setSelectedFiles(new Set());
+    setSelectedFileId(null);
+  };
+
+  const handleSelectAll = () => {
+    const currentFiles = uploadedFiles[selectedAnexosTab] || [];
+    const allFileIds = new Set(currentFiles.map(file => file.id));
+    setSelectedFiles(allFileIds);
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedFiles(new Set());
+  };
+
+  const handleFileSelection = (fileId: number, isSelected: boolean) => {
+    setSelectedFiles(prev => {
+      const newSet = new Set(prev);
+      if (isSelected) {
+        newSet.add(fileId);
+      } else {
+        newSet.delete(fileId);
+      }
+      return newSet;
+    });
+  };
+
   // Obter arquivo selecionado para os modais
   const selectedFile = selectedFileId 
     ? uploadedFiles[selectedAnexosTab].find(f => f.id === selectedFileId)
@@ -205,15 +436,114 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
 
   // Carregar filtros persistidos quando a empresa mudar
   useEffect(() => {
+    console.log('🔄 [DEBUG] useEffect - empresa mudou:', empresa?.id);
     const loaded = loadFiltersFromStorage(empresa?.id || null);
-    if (loaded) setFiltros(loaded);
-    else setFiltros(defaultFiltersByTab());
+    console.log('📂 [DEBUG] Filtros carregados do localStorage:', loaded);
+    if (loaded) {
+      setFiltros(loaded);
+      console.log('✅ [DEBUG] Filtros aplicados:', loaded);
+    } else {
+      const defaultFilters = defaultFiltersByTab();
+      setFiltros(defaultFilters);
+      console.log('🔧 [DEBUG] Filtros padrão aplicados:', defaultFilters);
+    }
+
+    const loadVideosFromIndexedDB = async () => {
+      if (!empresa?.id) {
+        console.log('🎥 [DEBUG] Nenhuma empresa selecionada, limpando vídeos');
+        setUploadedFiles({
+          videos: [],
+          audios: [],
+          documentos: [],
+          formularios: []
+        });
+        return;
+      }
+
+      console.log('🎥 [DEBUG] Carregando vídeos do IndexedDB para empresa:', empresa.id);
+      
+      try {
+        // Carregar dados de vídeos do IndexedDB usando localStorage como fallback
+        const videosData = JSON.parse(localStorage.getItem(`empresa_${empresa.id}_videos`) || '[]');
+        const audiosData = JSON.parse(localStorage.getItem(`empresa_${empresa.id}_audios`) || '[]');
+        const documentosData = JSON.parse(localStorage.getItem(`empresa_${empresa.id}_documentos`) || '[]');
+        const formulariosData = JSON.parse(localStorage.getItem(`empresa_${empresa.id}_formularios`) || '[]');
+        
+        console.log('🎥 [DEBUG] Dados carregados:', {
+          videos: videosData?.length || 0,
+          audios: audiosData?.length || 0,
+          documentos: documentosData?.length || 0,
+          formularios: formulariosData?.length || 0
+        });
+        
+        // Limpar thumbnails de arquivos que não têm __file válido (perdidos no localStorage)
+        const cleanInvalidThumbnails = (files: any[]) => {
+          return files.map((file: any) => {
+            if (!file.__file || !(file.__file instanceof File)) {
+              console.log('🧹 [DEBUG] Limpando thumbnail de arquivo inválido:', file.name);
+              return { ...file, thumb: undefined };
+            }
+            return file;
+          });
+        };
+        
+        setUploadedFiles({
+          videos: cleanInvalidThumbnails(videosData || []),
+          audios: cleanInvalidThumbnails(audiosData || []),
+          documentos: cleanInvalidThumbnails(documentosData || []),
+          formularios: cleanInvalidThumbnails(formulariosData || [])
+        });
+        
+        console.log('✅ [DEBUG] Dados de vídeos carregados com sucesso');
+      } catch (error) {
+        console.error('❌ [DEBUG] Erro ao carregar dados do IndexedDB:', error);
+        // Em caso de erro, inicializar com arrays vazios
+        setUploadedFiles({
+          videos: [],
+          audios: [],
+          documentos: [],
+          formularios: []
+        });
+      }
+    };
+
+    loadVideosFromIndexedDB();
   }, [empresa?.id]);
 
-  // Salvar filtros quando alterarem (associado à empresa)
+  // NOVO: Salvar uploadedFiles no IndexedDB quando mudarem
   useEffect(() => {
-    if (empresa?.id) saveFiltersToStorage(empresa.id, filtros);
-  }, [empresa?.id, filtros]);
+    const saveUploadedFilesToIndexedDB = async () => {
+      if (!empresa?.id) {
+        console.log('💾 [DEBUG] Nenhuma empresa selecionada, não salvando arquivos');
+        return;
+      }
+
+      console.log('💾 [DEBUG] Salvando arquivos no IndexedDB para empresa:', empresa.id);
+      console.log('💾 [DEBUG] Dados a salvar:', {
+        videos: uploadedFiles.videos?.length || 0,
+        audios: uploadedFiles.audios?.length || 0,
+        documentos: uploadedFiles.documentos?.length || 0,
+        formularios: uploadedFiles.formularios?.length || 0
+      });
+      
+      try {
+        // Salvar cada categoria separadamente no localStorage
+        localStorage.setItem(`empresa_${empresa.id}_videos`, JSON.stringify(uploadedFiles.videos || []));
+        localStorage.setItem(`empresa_${empresa.id}_audios`, JSON.stringify(uploadedFiles.audios || []));
+        localStorage.setItem(`empresa_${empresa.id}_documentos`, JSON.stringify(uploadedFiles.documentos || []));
+        localStorage.setItem(`empresa_${empresa.id}_formularios`, JSON.stringify(uploadedFiles.formularios || []));
+        
+        console.log('✅ [DEBUG] Arquivos salvos com sucesso no IndexedDB');
+      } catch (error) {
+        console.error('❌ [DEBUG] Erro ao salvar arquivos no IndexedDB:', error);
+      }
+    };
+
+    // Só salvar se temos uma empresa selecionada e dados para salvar
+    if (empresa?.id && uploadedFiles) {
+      saveUploadedFilesToIndexedDB();
+    }
+  }, [empresa?.id, uploadedFiles]);
 
   // Header interno exclusivo para a aba "Formulários" (estrutura dinâmica)
   const [abaAtual, setAbaAtual] = useState<string | null>(null);
@@ -252,28 +582,53 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
   }
 
   // Componente interno: filtros horizontais
-  const Filtros = ({ tabKey }: { tabKey: AnexosTabKey }) => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 flex items-center">
-      <DropdownCustomizado
-        value={filtros[tabKey].produto}
-        onChange={(v) => updateFiltro(tabKey, { produto: v })}
-        options={PRODUTO_OPCOES}
-        placeholder="Produto"
-      />
-      <DropdownCustomizado
-        value={filtros[tabKey].fase}
-        onChange={(v) => updateFiltro(tabKey, { fase: v })}
-        options={FASE_OPCOES}
-        placeholder="Fase"
-      />
-      <DropdownCustomizado
-        value={filtros[tabKey].atividade}
-        onChange={(v) => updateFiltro(tabKey, { atividade: v })}
-        options={ATIVIDADE_OPCOES}
-        placeholder="Atividade"
-      />
-    </div>
-  );
+  const Filtros = ({ tabKey }: { tabKey: AnexosTabKey }) => {
+    const currentFiltro = filtros[tabKey];
+    
+    // Calcular opções filtradas dinamicamente
+    const fasesFiltradas = getFilteredFases(currentFiltro.produto);
+    const atividadesFiltradas = getFilteredAtividades(currentFiltro.produto, currentFiltro.fase);
+    
+    return (
+      <div className="flex flex-col md:flex-row items-start justify-center gap-3 mb-0 w-full min-h-[60px]">
+        {/* Dropdown Produto */}
+        <div className="flex flex-col w-full md:flex-1">
+          <label className="text-sm font-medium text-gray-700 mb-1 text-left pl-[5px]">Produto</label>
+          <div className="w-full">
+            <DropdownCustomizado
+              value={currentFiltro.produto}
+              onChange={(v) => updateFiltro(tabKey, { produto: v })}
+              options={PRODUTO_OPCOES}
+            />
+          </div>
+        </div>
+
+        {/* Dropdown Fase */}
+        <div className="flex flex-col w-full md:flex-1">
+          <label className="text-sm font-medium text-gray-700 mb-1 text-left pl-[5px]">Fase</label>
+          <div className="w-full">
+            <DropdownCustomizado
+              value={currentFiltro.fase}
+              onChange={(v) => updateFiltro(tabKey, { fase: v })}
+              options={fasesFiltradas}
+            />
+          </div>
+        </div>
+
+        {/* Dropdown Atividade */}
+        <div className="flex flex-col w-full md:flex-1">
+          <label className="text-sm font-medium text-gray-700 mb-1 text-left pl-[5px]">Atividade</label>
+          <div className="w-full">
+            <DropdownCustomizado
+              value={currentFiltro.atividade}
+              onChange={(v) => updateFiltro(tabKey, { atividade: v })}
+              options={atividadesFiltradas}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Utilitário: gerar miniatura (thumbnail) a partir do arquivo de vídeo
   const generateVideoThumbnail = (file: File): Promise<string> => {
@@ -366,7 +721,7 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
       video.addEventListener('loadedmetadata', onLoadedMeta, { once: true });
       video.addEventListener('loadeddata', onLoadedData, { once: true });
       video.addEventListener('seeked', onSeeked, { once: true });
-      video.onerror = (ev) => {
+      video.onerror = () => {
         const err = (video as any).error; // MediaError
         log('video.onerror', err);
         rejectOnce(new Error('Falha ao carregar vídeo para gerar thumbnail'));
@@ -378,16 +733,34 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
 
   // Função para lidar com upload de arquivos
   const handleUpload = async (files: File[], metadata: any) => {
-    const newFiles = files.map((file) => ({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      metadata,
-      uploadDate: new Date().toISOString(),
-      __file: file as File,
-      thumb: undefined as string | undefined,
-    }));
+    const newFiles = files.map((file) => {
+      const fileId = Date.now() + Math.random();
+      
+      // Usar os metadados vindos do UploadModal
+      const fileMetadataObj = {
+        produto: metadata.produto,
+        fase: metadata.fase,
+        atividade: metadata.atividade
+      };
+      
+      setFileMetadata(prev => ({
+        ...prev,
+        [fileId]: fileMetadataObj
+      }));
+      
+      const fileObj = {
+        id: fileId,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        metadata: fileMetadataObj,
+        uploadDate: new Date().toISOString(),
+        __file: file as File,
+        thumb: undefined as string | undefined,
+      };
+      
+      return fileObj;
+    });
 
     // Adiciona imediatamente (sem thumbnail) para feedback instantâneo
     setUploadedFiles((prev) => ({
@@ -399,6 +772,11 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
     if (selectedAnexosTab === 'videos') {
       for (const f of newFiles) {
         if (f.type?.startsWith('video/')) {
+          // Validar se f.__file existe e é uma instância válida de File
+          if (!f.__file || !(f.__file instanceof File)) {
+            continue;
+          }
+          
           try {
             const thumb = await generateVideoThumbnail(f.__file);
             setUploadedFiles((prev) => ({
@@ -407,7 +785,7 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
                 it.id === f.id ? { ...it, thumb } : it
               ),
             }));
-          } catch {
+          } catch (error) {
             // mantém sem thumbnail se falhar
           }
         }
@@ -487,7 +865,32 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
     }
 
     // Outras telas: renderizar arquivos ou placeholder
-    const files = uploadedFiles[selectedAnexosTab];
+    const allFiles = uploadedFiles[selectedAnexosTab];
+    const currentFiltro = filtros[selectedAnexosTab];
+    
+    // Filtrar arquivos baseado nos metadados
+    const files = allFiles.filter(file => {
+      const fileMeta = fileMetadata[file.id] || file.metadata || {};
+      
+      // NOVO: Se todos os filtros estiverem vazios (apenas placeholders), não mostrar nenhum arquivo
+      if (!currentFiltro.produto && !currentFiltro.fase && !currentFiltro.atividade) {
+        return false;
+      }
+      
+      // Se produto for "todos" ou vazio, mostrar todos
+      if (currentFiltro.produto === 'todos' || !currentFiltro.produto) return true;
+      if (currentFiltro.produto && fileMeta.produto !== currentFiltro.produto) return false;
+      
+      // Se fase for "todas" ou vazio, mostrar todos (desde que produto coincida)
+      if (currentFiltro.fase === 'todas' || !currentFiltro.fase) return true;
+      if (currentFiltro.fase && fileMeta.fase !== currentFiltro.fase) return false;
+      
+      // Se atividade for "todas" ou vazio, mostrar todos (desde que produto e fase coincidam)
+      if (currentFiltro.atividade === 'todas' || !currentFiltro.atividade) return true;
+      if (currentFiltro.atividade && fileMeta.atividade !== currentFiltro.atividade) return false;
+      
+      return true;
+    });
     
     if (files.length === 0) {
       return (
@@ -509,7 +912,7 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
     }
 
     return (
-       <div className="bg-white rounded-[8px] my-[10px] flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+       <div className="bg-white rounded-[8px] my-[10px] pt-[2px] flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
          <div className="flex items-start gap-2 pl-[10px]">
            {/* Barra de edição fixa (sticky) à esquerda */}
            <div className="sticky top-0 self-start">
@@ -519,7 +922,12 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
                onLink={handleLinkRequest}
                onDownload={handleDownload}
                onDelete={handleDeleteRequest}
-               disabled={!selectedFileId}
+               disabled={!selectedFileId && !isMultiSelectMode}
+               isMultiSelectMode={isMultiSelectMode}
+               onToggleMultiSelect={handleToggleMultiSelect}
+               onSelectAll={handleSelectAll}
+               onDeselectAll={handleDeselectAll}
+               hasSelectedItems={selectedFiles.size > 0}
              />
            </div>
 
@@ -538,21 +946,46 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
                 {files.map((file) => (
                   <div 
                     key={file.id} 
-                    className="group cursor-pointer select-none flex flex-col items-center w-[98px] rounded-lg p-0 transition-all duration-200"
+                    className="group cursor-pointer select-none flex flex-col items-center w-[98px] rounded-lg p-0 transition-all duration-200 relative"
                      title={file.name}
                      onClick={(e) => {
                        e.stopPropagation(); // Evita que o clique propague para o contêiner
-                       setSelectedFileId(file.id);
+                       if (isMultiSelectMode) {
+                         const isSelected = selectedFiles.has(file.id);
+                         handleFileSelection(file.id, !isSelected);
+                       } else {
+                         setSelectedFileId(file.id);
+                       }
                      }}
                   >
+                   {/* Checkbox para seleção múltipla */}
+                   {isMultiSelectMode && (
+                     <div className="absolute top-2 left-2 z-10">
+                       <div className={`w-5 h-5 rounded-md border-[1px] flex items-center justify-center transition-all duration-200 shadow-sm ${
+                         selectedFiles.has(file.id) 
+                           ? 'bg-[#1777CF] border-[#1777CF] text-white scale-110' 
+                           : 'bg-white/90 border-gray-400 hover:border-[#1777CF] hover:bg-white backdrop-blur-sm'
+                       }`}>
+                         {selectedFiles.has(file.id) && (
+                           <Check className="w-3 h-3 stroke-[2.5]" />
+                         )}
+                       </div>
+                     </div>
+                   )}
                    {/* Miniatura estilo Windows Explorer com frame do vídeo */}
                     <div className="relative mb-2">
-                      <div className={`w-[96px] h-[96px] bg-white rounded-[6px] overflow-hidden shadow-sm transition-all ${selectedFileId === file.id ? 'ring-2 ring-[#2563EB]' : ''}`}>
+                      <div className={`w-[96px] h-[96px] bg-white rounded-[6px] overflow-hidden shadow-sm transition-all ${
+                        (isMultiSelectMode && selectedFiles.has(file.id)) || selectedFileId === file.id 
+                          ? 'ring-[1.5px] ring-[#1777CF]' 
+                          : ''
+                      }`}>
                        {selectedAnexosTab === 'videos' ? (
-                         file.thumb ? (
+                         file.thumb && file.__file ? (
                            <img src={file.thumb} alt={file.name} className="w-full h-full object-cover" />
                          ) : (
-                           <div className="w-full h-full bg-gray-200 animate-pulse" />
+                           <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative">
+                             <div className="text-3xl">🎬</div>
+                           </div>
                          )
                        ) : selectedAnexosTab === 'audios' ? (
                          <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center relative">
@@ -586,10 +1019,10 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
 
   // Retorno principal: todo conteúdo no container branco com borda cinza clara
   return (
-    <div className="flex-1 h-full flex flex-col min-w-0 overflow-hidden">
+    <div className="flex-1 h-full flex flex-col min-w-0 overflow-hidden" data-section="empresas">
       <div className="flex-1 bg-white rounded-[8px] flex flex-col overflow-hidden">
         {/* Header com carrossel de abas */}
-        <div className="flex items-center justify-between bg-[#F5F7FB] h-[48px] px-3">
+        <div className="flex items-center justify-between bg-white h-[48px] px-3">
           {/* Abas centralizadas */}
           <div className="flex-1 flex items-center justify-center">
             <div className="flex items-center gap-2">
@@ -643,6 +1076,9 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
           </div>
         </div>
 
+        {/* Linha divisória horizontal */}
+        <div className="w-full h-[1px] bg-[#E5E7EB]"></div>
+
         {/* Renderizar conteúdo baseado na aba atual */}
           {currentTab.key === "anexos" ? (
             <>
@@ -656,29 +1092,73 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
                 {/* Tabs centralizadas */}
                 <div className="flex-1 flex items-center justify-center">
                   <div className="flex items-center gap-6">
-                    {ANEXOS_TABS.map((tab) => (
-                      <button
-                        key={tab.key}
-                        onClick={() => setSelectedAnexosTab(tab.key)}
-                        className={`text-[14px] font-medium transition-colors ${
-                          selectedAnexosTab === tab.key
-                            ? "text-[#2563EB] border-b-2 border-[#2563EB] pb-1"
-                            : "text-[#6B7280] hover:text-[#111827]"
-                        }`}
-                      >
-                        {tab.label} ({tab.count.toString().padStart(2, '0')})
-                      </button>
-                    ))}
+                    {ANEXOS_TABS.map((tab) => {
+                      // Calcular contagem real de arquivos aplicando a mesma lógica de filtragem
+                      const allFiles = uploadedFiles[tab.key] || [];
+                      const currentFiltro = filtros[tab.key];
+                      
+                      // Aplicar a mesma lógica de filtragem da função renderConteudoAnexos
+                      const filteredFiles = allFiles.filter(file => {
+                        const fileMeta = fileMetadata[file.id] || file.metadata || {};
+                        
+                        // Se todos os filtros estiverem vazios (apenas placeholders), não contar nenhum arquivo
+                        if (!currentFiltro.produto && !currentFiltro.fase && !currentFiltro.atividade) {
+                          return false;
+                        }
+                        
+                        // Se produto for "todos" ou vazio, mostrar todos
+                        if (currentFiltro.produto === 'todos' || !currentFiltro.produto) return true;
+                        if (currentFiltro.produto && fileMeta.produto !== currentFiltro.produto) return false;
+                        
+                        // Se fase for "todas" ou vazio, mostrar todos (desde que produto coincida)
+                        if (currentFiltro.fase === 'todas' || !currentFiltro.fase) return true;
+                        if (currentFiltro.fase && fileMeta.fase !== currentFiltro.fase) return false;
+                        
+                        // Se atividade for "todas" ou vazio, mostrar todos (desde que produto e fase coincidam)
+                        if (currentFiltro.atividade === 'todas' || !currentFiltro.atividade) return true;
+                        if (currentFiltro.atividade && fileMeta.atividade !== currentFiltro.atividade) return false;
+                        
+                        return true;
+                      });
+                      
+                      const realCount = filteredFiles.length;
+                      
+                      return (
+                        <button
+                          key={tab.key}
+                          onClick={() => setSelectedAnexosTab(tab.key)}
+                          className={`text-[14px] font-medium transition-colors ${
+                            selectedAnexosTab === tab.key
+                              ? "text-[#2563EB] border-b-2 border-[#2563EB] pb-1"
+                              : "text-[#6B7280] hover:text-[#111827]"
+                          }`}
+                        >
+                          {tab.label} ({realCount.toString().padStart(2, '0')})
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 
-                {/* Botão + à extrema direita */}
-                <button 
-                  onClick={() => setIsUploadModalOpen(true)}
-                  className="w-[32px] h-[32px] bg-[#1777CF] text-white rounded-[6px] flex items-center justify-center hover:bg-[#1565C0] transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
+                {/* Botões à extrema direita */}
+                <div className="flex items-center gap-2">
+                  {/* Botão Cache Manager */}
+                  <button 
+                    onClick={() => setIsCacheManagerOpen(true)}
+                    className="w-[32px] h-[32px] bg-[#6B46C1] text-white rounded-[6px] flex items-center justify-center hover:bg-[#553C9A] transition-colors"
+                    title="Gerenciar Cache de Anexos"
+                  >
+                    <HardDrive className="w-4 h-4" />
+                  </button>
+                  
+                  {/* Botão + */}
+                  <button 
+                    onClick={() => setIsUploadModalOpen(true)}
+                    className="w-[32px] h-[32px] bg-[#1777CF] text-white rounded-[6px] flex items-center justify-center hover:bg-[#1565C0] transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </>
           ) : (
@@ -720,19 +1200,28 @@ export function EmpresaDetails({ empresa, estrutura, onSalvarValor }: EmpresaDet
       <ShareModal
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
+        fileName={selectedFile?.name}
+        fileUrl={selectedFile?.__file && selectedFile.__file instanceof File ? URL.createObjectURL(selectedFile.__file) : undefined}
       />
 
       <LinkModal
         isOpen={isLinkOpen}
+        current={selectedFile ? (fileMetadata[selectedFile.id] || selectedFile.metadata || { produto: '', fase: '', atividade: '' }) : null}
         onClose={() => setIsLinkOpen(false)}
         onSave={handleLinkSave}
       />
 
       <DeleteModal
         isOpen={isDeleteOpen}
-        fileName={selectedFile?.name || ''}
+        message={`Tem certeza que deseja excluir "${selectedFile?.name || ''}"?`}
         onClose={() => setIsDeleteOpen(false)}
         onConfirm={handleDeleteConfirm}
+      />
+
+      {/* Cache Manager Modal */}
+      <CacheManager
+        isOpen={isCacheManagerOpen}
+        onClose={() => setIsCacheManagerOpen(false)}
       />
     </div>
   );

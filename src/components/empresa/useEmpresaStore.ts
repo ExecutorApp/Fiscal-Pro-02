@@ -30,12 +30,18 @@ const estruturaInicial: EstruturaEmpresas = {
 const exemploEmpresas: Empresa[] = [];
 
 function carregarState(): EmpresasState {
+  console.log('💾 [DEBUG] useEmpresaStore - Carregando dados do localStorage');
   const salvo = localStorage.getItem(STORAGE_KEY);
   if (salvo) {
     try {
-      return JSON.parse(salvo);
-    } catch {}
+      const dados = JSON.parse(salvo);
+      console.log('💾 [DEBUG] Dados carregados do localStorage:', dados);
+      return dados;
+    } catch (error) {
+      console.error('❌ [DEBUG] Erro ao carregar dados do localStorage:', error);
+    }
   }
+  console.log('💾 [DEBUG] Nenhum dado encontrado, usando dados iniciais');
   return {
     empresas: exemploEmpresas,
     selecionadaId: null,
@@ -44,9 +50,11 @@ function carregarState(): EmpresasState {
 }
 
 export function useEmpresaStore() {
+  console.log('🏪 [DEBUG] useEmpresaStore - Hook inicializado');
   const [state, setState] = useState<EmpresasState>(() => carregarState());
 
   useEffect(() => {
+    console.log('💾 [DEBUG] useEmpresaStore - Salvando dados no localStorage:', state);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 

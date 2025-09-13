@@ -171,7 +171,7 @@ export function EmpresasList({
                              className="w-9 h-9 flex items-center justify-center bg-[#F4F4F4] rounded-lg hover:bg-gray-300 transition-colors"
                              title="Mais opções"
                            >
-                             <svg xmlns="http://www.w3.org/2000/svg" width="3,5" height="18" viewBox="0 0 4 18" fill="none">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="3.5" height="18" viewBox="0 0 4 18" fill="none">
                                <path d="M4 2C4 3.10457 3.10457 4 2 4C0.895431 4 0 3.10457 0 2C0 0.895431 0.895431 0 2 0C3.10457 0 4 0.895431 4 2Z" fill="#3A3F51"/>
                                <path d="M4 9C4 10.1046 3.10457 11 2 11C0.895431 11 0 10.1046 0 9C0 7.89543 0.895431 7 2 7C3.10457 7 4 7.89543 4 9Z" fill="#3A3F51"/>
                                <path d="M2 18C3.10457 18 4 17.1046 4 16C4 14.8954 3.10457 14 2 14C0.895431 14 0 14.8954 0 16C0 17.1046 0.895431 18 2 18Z" fill="#3A3F51"/>

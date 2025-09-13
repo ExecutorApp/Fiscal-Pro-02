@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, Upload, FileText, Video, Music, FileImage, ChevronDown } from 'lucide-react';
+import { X, Upload, FileText, Video, Music, FileImage } from 'lucide-react';
 import type { AnexosTabKey } from './EmpresaDetails';
 import type { LucideIcon } from 'lucide-react';
+import DropdownCustomizado from '../DropdownCustomizado';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -17,22 +18,103 @@ interface UploadMetadata {
 }
 
 const PRODUTO_OPCOES = [
-  { value: 'produto1', label: 'Produto 1' },
-  { value: 'produto2', label: 'Produto 2' },
-  { value: 'produto3', label: 'Produto 3' },
+  { value: "hp", label: "Holding Patrimonial" },
+  { value: "af", label: "Ativos Fundiários" },
+  { value: "pt", label: "Planejamento Tributário" },
 ];
 
 const FASE_OPCOES = [
-  { value: 'fase1', label: 'Fase 1' },
-  { value: 'fase2', label: 'Fase 2' },
-  { value: 'fase3', label: 'Fase 3' },
+  { value: "hp-f01", label: "HP - Fase 01" },
+  { value: "hp-f02", label: "HP - Fase 02" },
+  { value: "hp-f03", label: "HP - Fase 03" },
+  { value: "af-f01", label: "AF - Fase 01" },
+  { value: "af-f02", label: "AF - Fase 02" },
+  { value: "af-f03", label: "AF - Fase 03" },
+  { value: "pt-f01", label: "PT - Fase 01" },
+  { value: "pt-f02", label: "PT - Fase 02" },
+  { value: "pt-f03", label: "PT - Fase 03" },
 ];
 
 const ATIVIDADE_OPCOES = [
-  { value: 'atividade1', label: 'Atividade 1' },
-  { value: 'atividade2', label: 'Atividade 2' },
-  { value: 'atividade3', label: 'Atividade 3' },
+  { value: "hp-f01-a01", label: "HP/F01 - Atividade 01" },
+  { value: "hp-f01-a02", label: "HP/F01 - Atividade 02" },
+  { value: "hp-f01-a03", label: "HP/F01 - Atividade 03" },
+  { value: "hp-f02-a01", label: "HP/F02 - Atividade 01" },
+  { value: "hp-f02-a02", label: "HP/F02 - Atividade 02" },
+  { value: "hp-f02-a03", label: "HP/F02 - Atividade 03" },
+  { value: "hp-f03-a01", label: "HP/F03 - Atividade 01" },
+  { value: "hp-f03-a02", label: "HP/F03 - Atividade 02" },
+  { value: "hp-f03-a03", label: "HP/F03 - Atividade 03" },
+  { value: "af-f01-a01", label: "AF/F01 - Atividade 01" },
+  { value: "af-f01-a02", label: "AF/F01 - Atividade 02" },
+  { value: "af-f01-a03", label: "AF/F01 - Atividade 03" },
+  { value: "af-f02-a01", label: "AF/F02 - Atividade 01" },
+  { value: "af-f02-a02", label: "AF/F02 - Atividade 02" },
+  { value: "af-f02-a03", label: "AF/F02 - Atividade 03" },
+  { value: "af-f03-a01", label: "AF/F03 - Atividade 01" },
+  { value: "af-f03-a02", label: "AF/F03 - Atividade 02" },
+  { value: "af-f03-a03", label: "AF/F03 - Atividade 03" },
+  { value: "pt-f01-a01", label: "PT/F01 - Atividade 01" },
+  { value: "pt-f01-a02", label: "PT/F01 - Atividade 02" },
+  { value: "pt-f01-a03", label: "PT/F01 - Atividade 03" },
+  { value: "pt-f02-a01", label: "PT/F02 - Atividade 01" },
+  { value: "pt-f02-a02", label: "PT/F02 - Atividade 02" },
+  { value: "pt-f02-a03", label: "PT/F02 - Atividade 03" },
+  { value: "pt-f03-a01", label: "PT/F03 - Atividade 01" },
+  { value: "pt-f03-a02", label: "PT/F03 - Atividade 02" },
+  { value: "pt-f03-a03", label: "PT/F03 - Atividade 03" },
 ];
+
+// Funções auxiliares para extrair relacionamentos hierárquicos
+const extractProdutoFromFase = (faseValue: string): string => {
+  if (!faseValue) return "";
+  const [produto] = faseValue.split("-");
+  return produto;
+};
+
+const extractProdutoFromAtividade = (atividadeValue: string): string => {
+  if (!atividadeValue) return "";
+  const [produto] = atividadeValue.split("-");
+  return produto;
+};
+
+const extractFaseFromAtividade = (atividadeValue: string): string => {
+  if (!atividadeValue) return "";
+  const parts = atividadeValue.split("-");
+  if (parts.length >= 2) {
+    return `${parts[0]}-${parts[1]}`;
+  }
+  return "";
+};
+
+const getFilteredFases = (produtoValue: string) => {
+  if (!produtoValue) {
+    return FASE_OPCOES;
+  }
+  return FASE_OPCOES.filter(fase => 
+    fase.value.startsWith(produtoValue + "-")
+  );
+};
+
+const getFilteredAtividades = (produtoValue: string, faseValue: string) => {
+  if (!produtoValue && !faseValue) {
+    return ATIVIDADE_OPCOES;
+  }
+  
+  if (faseValue) {
+    return ATIVIDADE_OPCOES.filter(atividade => 
+      atividade.value.startsWith(faseValue + "-")
+    );
+  }
+  
+  if (produtoValue) {
+    return ATIVIDADE_OPCOES.filter(atividade => 
+      atividade.value.startsWith(produtoValue + "-")
+    );
+  }
+  
+  return ATIVIDADE_OPCOES;
+};
 
 const FILE_TYPE_CONFIG: Record<AnexosTabKey, { title: string; icon: LucideIcon; accept: string; allowedTypes: string[]; description: string; }> = {
   videos: {
@@ -73,6 +155,10 @@ export default function UploadModal({ isOpen, onClose, tabType, onUpload }: Uplo
     atividade: ''
   });
   const [dragActive, setDragActive] = useState(false);
+
+  // Opções filtradas baseadas na seleção hierárquica
+  const fasesDisponiveis = getFilteredFases(metadata.produto);
+  const atividadesDisponiveis = getFilteredAtividades(metadata.produto, metadata.fase);
 
   const config = FILE_TYPE_CONFIG[tabType];
   const IconComponent = config.icon;
@@ -134,6 +220,42 @@ export default function UploadModal({ isOpen, onClose, tabType, onUpload }: Uplo
     handleClose();
   };
 
+  // Handlers para mudanças hierárquicas
+  const handleProdutoChange = (value: string) => {
+    const newMetadata = { ...metadata, produto: value };
+    
+    // Reset fase e atividade quando produto muda
+    const novasFases = getFilteredFases(value);
+    if (!novasFases.find(f => f.value === metadata.fase)) {
+      newMetadata.fase = '';
+      newMetadata.atividade = '';
+    } else {
+      // Verifica se a atividade atual ainda é válida
+      const novasAtividades = getFilteredAtividades(value, metadata.fase);
+      if (!novasAtividades.find(a => a.value === metadata.atividade)) {
+        newMetadata.atividade = '';
+      }
+    }
+    
+    setMetadata(newMetadata);
+  };
+
+  const handleFaseChange = (value: string) => {
+    const newMetadata = { ...metadata, fase: value };
+    
+    // Reset atividade quando fase muda
+    const novasAtividades = getFilteredAtividades(metadata.produto, value);
+    if (!novasAtividades.find(a => a.value === metadata.atividade)) {
+      newMetadata.atividade = '';
+    }
+    
+    setMetadata(newMetadata);
+  };
+
+  const handleAtividadeChange = (value: string) => {
+    setMetadata(prev => ({ ...prev, atividade: value }));
+  };
+
   const handleClose = () => {
     setSelectedFiles([]);
     setMetadata({ produto: '', fase: '', atividade: '' });
@@ -144,7 +266,7 @@ export default function UploadModal({ isOpen, onClose, tabType, onUpload }: Uplo
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-      <div className="bg-white rounded-lg shadow-xl w-[900px] h-[600px] mx-4 overflow-hidden flex flex-col">
+      <div className="bg-white rounded-lg shadow-xl w-[900px] h-[700px] mx-4 overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
@@ -202,55 +324,39 @@ export default function UploadModal({ isOpen, onClose, tabType, onUpload }: Uplo
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Produto *
                   </label>
-                  <div className="relative">
-                    <select
-                      value={metadata.produto}
-                      onChange={(e) => setMetadata(prev => ({ ...prev, produto: e.target.value }))}
-                      className="w-full px-3 py-2 pr-[40px] border border-gray-300 rounded-lg focus:ring-0,5 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus-visible:outline-none appearance-none"
-                    >
-                      <option value="">Selecione...</option>
-                      {PRODUTO_OPCOES.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  </div>
+                  <DropdownCustomizado
+                    options={PRODUTO_OPCOES}
+                    value={metadata.produto}
+                    onChange={handleProdutoChange}
+                    placeholder="Selecione o produto"
+                    className="w-full"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Fase *
                   </label>
-                  <div className="relative">
-                    <select
-                      value={metadata.fase}
-                      onChange={(e) => setMetadata(prev => ({ ...prev, fase: e.target.value }))}
-                      className="w-full px-3 py-2 pr-[40px] border border-gray-300 rounded-lg focus:ring-0,5 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus-visible:outline-none appearance-none"
-                    >
-                      <option value="">Selecione...</option>
-                      {FASE_OPCOES.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  </div>
+                  <DropdownCustomizado
+                    options={fasesDisponiveis}
+                    value={metadata.fase}
+                    onChange={handleFaseChange}
+                    placeholder="Selecione a fase"
+                    className="w-full"
+                    disabled={!metadata.produto}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Atividade *
                   </label>
-                  <div className="relative">
-                    <select
-                      value={metadata.atividade}
-                      onChange={(e) => setMetadata(prev => ({ ...prev, atividade: e.target.value }))}
-                      className="w-full px-3 py-2 pr-[40px] border border-gray-300 rounded-lg focus:ring-0,5 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus-visible:outline-none appearance-none"
-                    >
-                      <option value="">Selecione...</option>
-                      {ATIVIDADE_OPCOES.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  </div>
+                  <DropdownCustomizado
+                    options={atividadesDisponiveis}
+                    value={metadata.atividade}
+                    onChange={handleAtividadeChange}
+                    placeholder="Selecione a atividade"
+                    className="w-full"
+                    disabled={!metadata.fase}
+                  />
                 </div>
               </div>
             </div>

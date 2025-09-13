@@ -23,12 +23,12 @@ const RenameModal: React.FC<RenameModalProps> = ({ isOpen, currentName = "", onC
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-0,5 focus:ring-[#1777CF] focus:border-[#1777CF]"
           placeholder="Novo nome"
         />
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-3 py-2 rounded border">Cancelar</button>
-          <button onClick={() => onSave(name)} className="px-3 py-2 rounded bg-blue-600 text-white">Salvar</button>
+          <button onClick={onClose} className="px-[25px] py-2 rounded border">Cancelar</button>
+          <button onClick={() => onSave(name)} className="px-[25px] py-2 rounded bg-[#1777CF] text-white">Salvar</button>
         </div>
       </div>
     </div>
